@@ -16,8 +16,14 @@ Deux fichiers y sont joints :
 | `KoA-<version>-win-x64.msi` | **le plus simple** — double-clic, aucun droit d'administrateur, raccourci au menu Démarrer, désinstallation propre |
 | `KoA-<version>-win-x64.zip` | qui préfère ne rien installer, ou dont l'entreprise bloque les `.msi` |
 
-**Windows affichera « Windows a protégé votre ordinateur »** : le paquet n'est pas signé.
-*Informations complémentaires* → *Exécuter quand même*.
+**Windows affichera « Windows a protégé votre ordinateur »** : le paquet n'est pas signé — ce
+n'est pas une menace détectée, c'est l'absence de signature.
+
+Plutôt que de cliquer *Exécuter quand même* sans rien vérifier, deux gestes dans PowerShell, une
+fois pour toutes : `Get-FileHash` pour comparer l'empreinte à celle publiée dans la release, puis
+`Unblock-File` pour retirer le marquage « téléchargé depuis Internet ». L'avertissement ne revient
+plus pour ce fichier. Les deux commandes exactes et l'empreinte de la version sont **en bas de la
+page de la release**.
 
 ### Si vous prenez le `.zip`
 

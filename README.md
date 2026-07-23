@@ -1,57 +1,57 @@
-# KoA â€” Kingdom of Agents
+# KoA — Kingdom of Agents
 
 Poste de supervision des sessions **Claude Code** sous WSL2 : plusieurs agents ouverts en
-parallÃ¨le, leur Ã©tat d'un coup d'Å“il, et la possibilitÃ© de rÃ©pondre sans quitter la fenÃªtre.
+parallèle, leur état d'un coup d'œil, et la possibilité de répondre sans quitter la fenêtre.
 
-Ce dÃ©pÃ´t ne contient **que les binaires**. Les sources sont privÃ©es.
+Ce dépôt ne contient **que les binaires**. Les sources sont privées.
 
 ## Installer
 
-ðŸ‘‰ **[TÃ©lÃ©charger la derniÃ¨re version](../../releases/latest)**
+👉 **[Télécharger la dernière version](../../releases/latest)**
 
 Deux fichiers y sont joints :
 
 | Fichier | Pour qui |
 |---|---|
-| `KoA-<version>-win-x64.msi` | **le plus simple** â€” double-clic, aucun droit d'administrateur, raccourci au menu DÃ©marrer, dÃ©sinstallation propre |
-| `KoA-<version>-win-x64.zip` | qui prÃ©fÃ¨re ne rien installer, ou dont l'entreprise bloque les `.msi` |
+| `KoA-<version>-win-x64.msi` | **le plus simple** — double-clic, aucun droit d'administrateur, raccourci au menu Démarrer, désinstallation propre |
+| `KoA-<version>-win-x64.zip` | qui préfère ne rien installer, ou dont l'entreprise bloque les `.msi` |
 
-**Windows affichera Â« Windows a protÃ©gÃ© votre ordinateur Â»** : le paquet n'est pas signÃ©.
-*Informations complÃ©mentaires* â†’ *ExÃ©cuter quand mÃªme*.
+**Windows affichera « Windows a protégé votre ordinateur »** : le paquet n'est pas signé.
+*Informations complémentaires* → *Exécuter quand même*.
 
 ### Si vous prenez le `.zip`
 
-**Extrayez-le avant de lancer KoA** â€” clic droit sur l'archive â†’ *Extraire tout*.
+**Extrayez-le avant de lancer KoA** — clic droit sur l'archive → *Extraire tout*.
 
-Double-cliquer `Koa.App.exe` depuis l'aperÃ§u du zip fait apparaÃ®tre un message rÃ©clamant
+Double-cliquer `Koa.App.exe` depuis l'aperçu du zip fait apparaître un message réclamant
 l'installation du **.NET Desktop Runtime**. Ce message est trompeur : le runtime est bien dans
 l'archive, mais Windows n'aura extrait qu'un fichier sur 599. **Ne l'installez pas**, cela ne
-dÃ©bloquerait rien.
+débloquerait rien.
 
-## PrÃ©requis
+## Prérequis
 
 Deux choses qu'aucun paquet ne peut embarquer :
 
-- **WSL2**, avec au moins une distribution et **Claude Code** installÃ© dedans ;
-- le **runtime WebView2** â€” dÃ©jÃ  prÃ©sent sur un Windows Ã  jour.
+- **WSL2**, avec au moins une distribution et **Claude Code** installé dedans ;
+- le **runtime WebView2** — déjà présent sur un Windows à jour.
 
-Windows 10 version 2004 ou plus rÃ©cent, 64 bits.
+Windows 10 version 2004 ou plus récent, 64 bits.
 
 ## Au premier lancement
 
-KoA dÃ©pose son hook dans `~/.koa/` et fusionne les entrÃ©es nÃ©cessaires dans le
-`~/.claude/settings.json` de la distribution, aprÃ¨s sauvegarde en `settings.json.koa-backup`.
-Sans ce hook, les sessions s'ouvrent mais leur Ã©tat n'est pas suivi.
+KoA dépose son hook dans `~/.koa/` et fusionne les entrées nécessaires dans le
+`~/.claude/settings.json` de la distribution, après sauvegarde en `settings.json.koa-backup`.
+Sans ce hook, les sessions s'ouvrent mais leur état n'est pas suivi.
 
-Vos donnÃ©es â€” catalogue, sessions, journaux â€” vivent dans `%LOCALAPPDATA%\Koa`. **La
-dÃ©sinstallation ne les touche pas.**
+Vos données — catalogue, sessions, journaux — vivent dans `%LOCALAPPDATA%\Koa`. **La
+désinstallation ne les touche pas.**
 
-## Remonter un dÃ©faut
+## Remonter un défaut
 
-Indiquez la version affichÃ©e en haut Ã  gauche de la fenÃªtre, et joignez le journal du jour :
+Indiquez la version affichée en haut à gauche de la fenêtre, et joignez le journal du jour :
 
 ```
 %LOCALAPPDATA%\Koa\logs\koa-AAAAMMJJ.log
 ```
 
-Pour un journal dÃ©taillÃ©, lancez KoA avec `KOA_LOG_LEVEL=Verbose`.
+Pour un journal détaillé, lancez KoA avec `KOA_LOG_LEVEL=Verbose`.

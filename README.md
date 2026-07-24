@@ -13,7 +13,7 @@
 
 **[⬇ &nbsp;Télécharger la dernière version](../../releases/latest)**
 
-<img src="assets/vue-sessions.png" width="850" alt="KoA : la barre latérale à gauche — une session attend une autorisation, deux travaillent — et le terminal de la session ouverte à droite" />
+<img src="assets/vue-sessions.png" width="850" alt="KoA : la barre latérale à gauche — une session attend une autorisation, une travaille, une a fini — et à droite le terminal de la session ouverte, où l'agent rend son rapport" />
 
 </div>
 
@@ -59,17 +59,18 @@ de la barre latérale. Une session bloquée sur une permission ne peut pas se no
 - **Un vrai terminal** — chaque session vit dans un terminal complet, au thème assorti à
   l'application, pas dans un aperçu.
 - **Un catalogue de raccourcis** — distro, utilisateur, répertoire, commande de pré-lancement ;
-  groupes réordonnables, recherche, lancement rapide sans rien enregistrer.
-- **Quatre façons d'ouvrir un contexte** — avec Claude, en shell nu, dans VS Code, ou dans
-  l'Explorateur Windows.
+  groupes réordonnables, couleur et icône par projet, recherche, lancement rapide sans rien
+  enregistrer. Et **quatre façons d'ouvrir chaque contexte** : avec Claude, en shell nu, dans
+  VS Code, ou dans l'Explorateur Windows.
+
+  <img src="assets/catalogue.png" width="850" alt="Le catalogue : des raccourcis groupés, colorés et iconés, chacun portant ses quatre modes d'ouverture — Claude, terminal, VS Code, Explorateur" />
+
 - **Reprendre une conversation** — relire le transcript d'une session passée et repartir où
-  l'agent s'était arrêté.
+  l'agent s'était arrêté. Au redémarrage, KoA propose de rouvrir les sessions restées ouvertes :
+
+  <img src="assets/accueil.png" width="850" alt="La page d'accueil de KoA : le bandeau de reprise propose de rouvrir les trois sessions ouvertes à la dernière fermeture" />
 - **Multi-utilisateurs, multi-distros** — chaque session tourne sous l'utilisateur et la
   distribution WSL de son projet, sans se marcher dessus.
-
-<div align="center">
-<img src="assets/terminal.png" width="850" alt="Une session Claude Code ouverte dans KoA : le terminal occupe toute la fenêtre" />
-</div>
 
 ## Sous le capot
 

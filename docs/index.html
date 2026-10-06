@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Cinq sessions Claude Code simulées dans une fenêtre KoA : vignettes, autorisations, dock et catalogue.">
+<meta property="og:title" content="Simulateur KoA">
+<meta property="og:description" content="Lequel de vos agents vous attend ? Essayez KoA dans le navigateur, sans rien installer.">
+<link rel="icon" href="koa-logo.svg" type="image/svg+xml">
+<title>Simulateur KoA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* La fenêtre KoA reconstituée au centre ; la page autour n'est qu'un socle.
+   Tokens repris de docs/branding/direction-artistique.md — sombre d'abord, comme l'application. */
+:root {
+  color-scheme: dark;
+  --bg-app: #141310; --bg-canvas: #1A1915; --bg-panel: #211F1A; --bg-elev: #2A2822; --bg-hover: #322F28;
+  --stroke: #38352C; --stroke-hi: #4A473C;
+  --hi: #F4F1E7; --mid: #ABA692; --lo: #726E60; --brand: #E7E0CC;
+  --gold: #F6B12A; --on-gold: #1A1408; --gold-soft: rgba(246,177,42,.09); --gold-line: rgba(246,177,42,.55);
+  --s-wait: #F6B12A; --s-err: #EA5B54; --s-run: #45BCC2; --s-start: #86A2D6; --s-idle: #928C7C; --s-end: #6FA98C;
+  --desk: #0F0E0B; --shadow: 0 30px 70px rgba(0,0,0,.5);
+  /* Le terminal reste sombre dans les deux thèmes : arbitrage du 22/07/2026. */
+  --term-bg: #16150F; --term-fg: #E9E5D6; --term-dim: #8A8574; --term-box: #4A473C;
+  --t-red: #EA5B54; --t-green: #6FA98C; --t-yellow: #F6B12A; --t-blue: #86A2D6; --t-cyan: #45BCC2; --t-bright: #F4F1E7;
+  --ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --display: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg-app: #E8E4D8; --bg-canvas: #F2EEE3; --bg-panel: #FBF8EF; --bg-elev: #FFFDF6; --bg-hover: #EDE8D9;
+    --stroke: #D8D2C0; --stroke-hi: #C9C2AD;
+    --hi: #23211A; --mid: #5C584B; --lo: #8B8676; --brand: #3B372C;
+    --gold: #B06D00; --on-gold: #FFF8EA; --gold-soft: rgba(176,109,0,.08); --gold-line: rgba(176,109,0,.6);
+    --s-wait: #B06D00; --s-err: #C6322D; --s-run: #128891; --s-start: #3E63C4; --s-idle: #6B665A; --s-end: #2F7D54;
+    --desk: #DCD7C8; --shadow: 0 24px 60px rgba(60,50,20,.18);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-app: #E8E4D8; --bg-canvas: #F2EEE3; --bg-panel: #FBF8EF; --bg-elev: #FFFDF6; --bg-hover: #EDE8D9;
+  --stroke: #D8D2C0; --stroke-hi: #C9C2AD;
+  --hi: #23211A; --mid: #5C584B; --lo: #8B8676; --brand: #3B372C;
+  --gold: #B06D00; --on-gold: #FFF8EA; --gold-soft: rgba(176,109,0,.08); --gold-line: rgba(176,109,0,.6);
+  --s-wait: #B06D00; --s-err: #C6322D; --s-run: #128891; --s-start: #3E63C4; --s-idle: #6B665A; --s-end: #2F7D54;
+  --desk: #DCD7C8; --shadow: 0 24px 60px rgba(60,50,20,.18);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg-app); color: var(--hi); font: 13px/1.45 var(--ui); padding-inline: 16px; padding-block: 28px 48px; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--s-start); outline-offset: 2px; }
+.mono { font-family: var(--mono); }
+
+.page { max-width: 1240px; margin: 0 auto; display: grid; gap: 22px; }
+
+/* Socle */
+.intro { display: grid; gap: 10px; max-width: 70ch; }
+.brandline { display: flex; align-items: center; gap: 10px; }
+.logo { width: 28px; height: 28px; flex: none; }
+.logo rect { fill: var(--brand); }
+.logo .cap { fill: var(--gold); }
+.wordmark { font: 700 20px/1 var(--display); letter-spacing: .01em; }
+.tagline { font: 500 11px/1 var(--ui); color: var(--mid); text-transform: uppercase; letter-spacing: .12em; padding: 4px 8px; border: 1px solid var(--stroke); border-radius: 999px; }
+.intro h1 { font: 700 30px/1.15 var(--display); margin: 6px 0 0; text-wrap: balance; }
+.intro p { margin: 0; color: var(--mid); font-size: 14px; line-height: 1.55; }
+.intro a { color: var(--hi); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.ctl-label { font: 600 11px/1 var(--ui); text-transform: uppercase; letter-spacing: .1em; color: var(--mid); }
+.seg { display: inline-flex; border: 1px solid var(--stroke); border-radius: 8px; overflow: hidden; background: var(--bg-canvas); }
+.seg button { border: 0; background: transparent; padding: 6px 12px; color: var(--mid); }
+.seg button + button { border-left: 1px solid var(--stroke); }
+.seg button[aria-pressed="true"] { background: var(--bg-hover); color: var(--hi); font-weight: 600; }
+.ghost { border: 1px solid var(--stroke); background: var(--bg-canvas); border-radius: 8px; padding: 6px 12px; }
+.ghost:hover, .seg button:hover { background: var(--bg-hover); color: var(--hi); }
+.ctl-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* La scène */
+.stage { position: relative; min-width: 0; }
+.win {
+  --sbw: 360px;
+  display: grid; grid-template-columns: var(--sbw) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+  height: 680px; border: 1px solid var(--stroke); border-radius: 10px; overflow: hidden;
+  background: var(--bg-canvas); box-shadow: var(--shadow);
+  transition: grid-template-columns .28s cubic-bezier(.2,.7,.2,1);
+}
+.win[data-tier="rail"] { --sbw: 64px; }
+.win[data-tier="compacte"] { --sbw: 300px; }
+.win[data-tier="large"] { --sbw: 440px; }
+
+.titlebar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 6px 0 12px; background: var(--bg-app); border-bottom: 1px solid var(--stroke); }
+.titlebar .logo { width: 16px; height: 16px; }
+.titlebar .tt { font-weight: 600; font-size: 12px; }
+.titlebar .ts { color: var(--lo); font-size: 12px; }
+.titlebar .sp { flex: 1; }
+.titlebar button { border: 0; background: transparent; width: 40px; height: 28px; border-radius: 6px; color: var(--mid); font-size: 15px; }
+.titlebar button:hover { background: var(--bg-hover); color: var(--hi); }
+
+/* Barre latérale */
+.sidebar { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--stroke); background: var(--bg-canvas); }
+.sbhead { display: flex; align-items: baseline; justify-content: space-between; padding: 12px 12px 8px; }
+.sbhead h2 { margin: 0; font: 600 14px/1 var(--ui); }
+.sbhead span { color: var(--lo); font-size: 11px; }
+.cards { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px 10px 10px; }
+.sbfoot { padding: 10px; border-top: 1px solid var(--stroke); }
+.sbfoot button { width: 100%; border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 8px; padding: 9px 10px; font-weight: 600; }
+.sbfoot button:hover, .sbfoot button[aria-pressed="true"] { background: var(--bg-hover); }
+.sbfoot .plus { color: var(--gold); margin-right: 6px; }
+
+[data-state="waiting"] { --c: var(--s-wait); }
+[data-state="error"] { --c: var(--s-err); }
+[data-state="running"] { --c: var(--s-run); }
+[data-state="starting"] { --c: var(--s-start); }
+[data-state="idle"] { --c: var(--s-idle); }
+[data-state="ended"] { --c: var(--s-end); }
+
+/* Pastille : couleur + forme, jamais la couleur seule */
+.pst { width: 18px; height: 18px; flex: none; border-radius: 50%; border: 1.5px solid var(--c); position: relative; display: grid; place-items: center; }
+.pst::before { content: ""; display: block; }
+.pst[data-state="waiting"]::before { width: 7px; height: 7px; background: var(--c); transform: rotate(45deg); border-radius: 1px; }
+.pst[data-state="waiting"]::after { content: ""; position: absolute; inset: -1.5px; border: 2px solid var(--c); border-radius: 50%; animation: pulse 1.6s ease-out infinite; }
+.pst[data-state="error"]::before { width: 0; height: 0; border-left: 4.5px solid transparent; border-right: 4.5px solid transparent; border-bottom: 8px solid var(--c); margin-top: -1px; }
+.pst[data-state="running"]::before { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.pst[data-state="starting"] { border-color: var(--c) var(--c) var(--c) transparent; animation: spin 1.4s linear infinite; }
+.pst[data-state="ended"]::before { width: 4px; height: 8px; border: solid var(--c); border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px; }
+@keyframes pulse { from { transform: scale(.75); opacity: .7; } to { transform: scale(2); opacity: 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Vignette */
+.card { position: relative; flex: none; display: grid; gap: 4px; padding: 10px 10px 10px 13px; background: var(--bg-panel); border: 1px solid var(--stroke); border-radius: 9px; overflow: hidden; cursor: pointer; }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--c); }
+.card:hover { background: var(--bg-hover); }
+.card.sel { border-color: var(--mid); }
+.card[data-state="waiting"] { border-color: var(--gold-line); background: var(--gold-soft); }
+.card[data-state="waiting"].sel { border-color: var(--gold); }
+.r1 { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.nm { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.lbl { border: 1px solid var(--stroke-hi); background: transparent; border-radius: 999px; padding: 0 7px; font: 11px/17px var(--mono); color: var(--mid); white-space: nowrap; }
+.lbl:hover { color: var(--hi); border-color: var(--mid); }
+.kind { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--lo); }
+.r1 .sp { flex: 1; }
+.x { border: 0; background: transparent; color: var(--lo); width: 22px; height: 22px; border-radius: 5px; font-size: 14px; line-height: 1; }
+.x:hover { background: var(--bg-elev); color: var(--hi); }
+.r2, .r3, .r4 { font: 11px/1.45 var(--mono); color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.r2 .path { color: var(--lo); }
+.gb, .ga { color: var(--s-run); } .gd { color: var(--s-err); } .gl { color: var(--s-start); } .gc { color: var(--s-end); }
+.r4 { display: flex; align-items: center; gap: 6px; }
+.r4 .st { color: var(--c); font-weight: 600; }
+.r4 .dur { color: var(--mid); }
+.mode { border: 1px solid var(--stroke-hi); border-radius: 4px; padding: 0 5px; font-size: 10px; color: var(--mid); }
+.r4 .sp { flex: 1; }
+.rbtn { border: 1px solid var(--stroke); background: transparent; border-radius: 6px; padding: 1px 8px; font: 11px/18px var(--ui); color: var(--mid); }
+.rbtn:hover { color: var(--hi); background: var(--bg-elev); }
+.act { display: grid; gap: 4px; margin-top: 3px; }
+.act > div { background: var(--bg-canvas); border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act .desc { font-style: italic; }
+.act .desc::before { content: "◐ "; font-style: normal; color: var(--lo); }
+.card[data-state="error"] .act .desc { color: var(--s-err); font-style: normal; }
+.card[data-state="error"] .act .desc::before { content: "▲ "; color: var(--s-err); }
+.act .last::before { content: "❞ "; color: var(--lo); }
+.ask { margin-top: 4px; border: 1px solid var(--stroke); background: var(--bg-elev); border-radius: 8px; padding: 9px 10px; display: grid; gap: 4px; }
+.ask .askt { font-size: 11px; color: var(--mid); }
+.ask .askq { font: 12px/1.4 var(--mono); color: var(--hi); }
+.ask .askc { font: 11px/1.4 var(--mono); color: var(--s-run); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btns { display: flex; gap: 8px; margin-top: 6px; }
+.allow { border: 0; background: var(--gold); color: var(--on-gold); font-weight: 600; border-radius: 6px; padding: 6px 16px; }
+.allow:hover { filter: brightness(1.08); }
+.deny { border: 1px solid var(--stroke-hi); background: var(--bg-panel); border-radius: 6px; padding: 6px 14px; }
+.deny:hover { background: var(--bg-hover); }
+.reply { display: flex; gap: 6px; margin-top: 4px; }
+.reply input { flex: 1; min-width: 0; border: 1px solid var(--stroke-hi); background: var(--bg-canvas); border-radius: 6px; padding: 5px 8px; font-size: 12px; }
+.reply button { border: 1px solid var(--stroke-hi); background: var(--bg-elev); border-radius: 6px; padding: 4px 10px; font-size: 12px; }
+
+/* Les paliers : la largeur décide de ce qui s'affiche, rien n'est caché sans place */
+.win[data-tier="compacte"] .act, .win[data-tier="compacte"] .rbtn, .win[data-tier="compacte"] .reply, .win[data-tier="compacte"] .kind { display: none; }
+.win[data-tier="large"] .act > div { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.win[data-tier="rail"] .sbhead, .win[data-tier="rail"] .sbfoot .lab { display: none; }
+.win[data-tier="rail"] .sbfoot .plus { margin: 0; }
+.win[data-tier="rail"] .cards { padding: 10px 8px; align-items: center; }
+.win[data-tier="rail"] .card { width: 44px; height: 44px; padding: 0; place-items: center; }
+.win[data-tier="rail"] .card > :not(.r1), .win[data-tier="rail"] .r1 > :not(.pst) { display: none; }
+.win[data-tier="rail"] .card .pst { width: 22px; height: 22px; }
+
+/* Panneau principal */
+.pane { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--term-bg); }
+.view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.phead { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--bg-canvas); border-bottom: 1px solid var(--stroke); min-width: 0; }
+.phead .who { min-width: 0; display: flex; align-items: baseline; gap: 10px; flex: 1; overflow: hidden; white-space: nowrap; }
+.phead .who b { font-size: 14px; }
+.phead .who span { font: 11px var(--mono); color: var(--mid); overflow: hidden; text-overflow: ellipsis; }
+.phead .stp { font: 600 11px var(--mono); color: var(--c); white-space: nowrap; }
+.doors { display: flex; gap: 4px; flex: none; }
+.door { width: 32px; height: 28px; border-radius: 6px; border: 1px solid var(--stroke-hi); background: var(--bg-elev); font: 600 12px/1 var(--mono); color: var(--mid); }
+.door:hover { color: var(--hi); }
+.door.claude { color: var(--gold); border-color: var(--gold-line); background: var(--gold-soft); }
+.pstrip { padding: 6px 14px; font: 12px var(--mono); color: var(--mid); background: var(--bg-canvas); border-bottom: 1px solid var(--stroke); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pstrip::before { content: "› "; color: var(--gold); }
+
+.term { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px; background: var(--term-bg); color: var(--term-fg); font: 13px/1.5 var(--mono); }
+.term .l { white-space: pre-wrap; overflow-wrap: anywhere; }
+.term b { font-weight: 600; color: var(--t-bright); }
+.term .dot { color: var(--t-green); }
+.term .dot.w { color: var(--t-bright); }
+.term .prm { color: var(--term-fg); background: rgba(233,229,214,.06); border-radius: 4px; padding: 2px 8px; margin: 10px 0 6px; }
+.term .res, .term .dim { color: var(--term-dim); }
+.term .msg { margin: 8px 0 2px; }
+.term .err { color: var(--t-red); }
+.term .tbox { border: 1px solid var(--term-box); border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+.term .tbox.perm { border-color: var(--t-yellow); }
+.term .tbox.ban { border-color: var(--t-yellow); color: var(--term-dim); }
+.term .g { color: var(--t-green); } .term .r { color: var(--t-red); } .term .y { color: var(--t-yellow); } .term .c { color: var(--t-cyan); } .term .bl { color: var(--t-blue); }
+.term .koa { color: var(--term-dim); font-style: italic; }
+
+.tin { display: flex; align-items: center; gap: 8px; margin: 0 12px; padding: 8px 4px; border-top: 1px solid var(--term-box); border-bottom: 1px solid var(--term-box); font: 13px var(--mono); color: var(--term-fg); }
+.tin span { color: var(--t-bright); }
+.tin input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--term-fg); font: 13px var(--mono); outline: none; caret-color: var(--t-yellow); }
+.tin input::placeholder { color: var(--term-dim); }
+.tin:focus-within { border-top-color: var(--t-yellow); }
+.tstat { padding: 6px 16px 10px; font: 11.5px/1.5 var(--mono); color: var(--term-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tstat .c { color: var(--t-cyan); } .tstat .y { color: var(--t-yellow); }
+.empty { flex: 1; display: grid; place-items: center; color: var(--term-dim); text-align: center; padding: 24px; }
+
+/* Catalogue */
+.cat { flex: 1; min-height: 0; overflow-y: auto; background: var(--bg-canvas); padding: 18px 20px 24px; display: grid; align-content: start; gap: 16px; }
+.cathead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.cathead h2 { margin: 0 auto 0 0; font: 600 18px/24px var(--ui); }
+.cathead input { width: min(320px, 100%); border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 8px; padding: 7px 10px; }
+.cathead .new { border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 8px; padding: 7px 12px; }
+.grp { display: grid; gap: 8px; }
+.grp h3 { margin: 0; font: 600 11px/1 var(--ui); text-transform: uppercase; letter-spacing: .1em; color: var(--mid); display: flex; gap: 8px; }
+.grp h3 span { color: var(--lo); }
+.entries { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.entry { background: var(--bg-panel); border: 1px solid var(--stroke); border-radius: 9px; padding: 11px 12px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 8px; align-items: start; }
+.entry .hdl { color: var(--lo); cursor: grab; line-height: 18px; }
+.entry .en { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13px; line-height: 18px; }
+.entry .chip { width: 14px; height: 14px; border-radius: 4px; background: var(--pc); flex: none; }
+.entry .em { grid-column: 2 / 4; font: 11px/1.5 var(--mono); color: var(--s-idle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entry .more { color: var(--lo); font-size: 15px; line-height: 18px; }
+.entry .modes { grid-column: 2 / 4; display: flex; gap: 6px; margin-top: 8px; }
+.modes .claude { flex: 1; border: 1px solid var(--gold-line); background: var(--gold-soft); color: var(--gold); border-radius: 6px; padding: 5px 8px; font-weight: 600; }
+.modes .claude:hover { background: var(--gold); color: var(--on-gold); }
+.modes .door { height: 30px; }
+.nores { color: var(--mid); }
+
+/* Le bureau, quand KoA est réduit */
+.desk { height: 680px; border-radius: 10px; border: 1px dashed var(--stroke-hi); background: var(--desk); display: grid; grid-template-rows: 1fr auto; padding: 24px 16px; gap: 16px; }
+.desk p { margin: 0; align-self: center; text-align: center; color: var(--mid); max-width: 52ch; justify-self: center; line-height: 1.55; }
+.dock { justify-self: center; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; max-width: 100%; background: var(--bg-elev); border: 1px solid var(--stroke-hi); border-radius: 10px; padding: 8px 10px 8px 14px; box-shadow: var(--shadow); }
+.dlogo { display: flex; align-items: center; gap: 7px; font-weight: 700; }
+.dlogo .logo { width: 16px; height: 16px; }
+.dcounts { display: flex; gap: 12px; flex-wrap: wrap; }
+.dcounts span { display: flex; align-items: center; gap: 6px; color: var(--mid); font-size: 12.5px; }
+.dcounts span.on { color: var(--hi); font-weight: 600; }
+.dcounts .pst { width: 14px; height: 14px; }
+.dsep { width: 1px; align-self: stretch; background: var(--stroke-hi); }
+.dname { font-weight: 700; }
+.dreq { font: 11px var(--mono); color: var(--mid); max-width: 26ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dact { display: flex; gap: 8px; }
+
+/* Notifications */
+.toasts { position: absolute; top: 44px; right: 12px; width: min(340px, calc(100% - 24px)); display: grid; gap: 8px; z-index: 5; pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; background: var(--bg-elev); border: 1px solid var(--stroke-hi); border-radius: 9px; padding: 10px 12px; box-shadow: var(--shadow); font-size: 12.5px; animation: tin .25s ease-out; }
+.toast .pst { width: 14px; height: 14px; }
+.toast p { margin: 0; flex: 1; min-width: 0; }
+.toast button { border: 1px solid var(--stroke-hi); background: var(--bg-panel); border-radius: 6px; padding: 3px 10px; font-size: 12px; }
+@keyframes tin { from { transform: translateY(-6px); opacity: 0; } }
+
+/* Sous la fenêtre */
+.below { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+.below h2 { margin: 0 0 12px; font: 600 13px/1 var(--ui); text-transform: uppercase; letter-spacing: .1em; color: var(--mid); }
+.try ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.try li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.45; font-size: 13.5px; }
+.try .box { width: 16px; height: 16px; flex: none; margin-top: 2px; border: 1.5px solid var(--stroke-hi); border-radius: 4px; display: grid; place-items: center; }
+.try li.ok { color: var(--mid); }
+.try li.ok .box { border-color: var(--s-end); background: var(--s-end); }
+.try li.ok .box::after { content: ""; width: 4px; height: 8px; border: solid var(--bg-app); border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px; }
+.try .score { margin-top: 12px; color: var(--lo); font-size: 12px; }
+.legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
+.lg { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: center; }
+.lg b { color: var(--c); font-size: 13px; }
+.lg span { grid-column: 2; color: var(--mid); font-size: 12.5px; line-height: 1.4; }
+.foot { color: var(--lo); font-size: 12px; line-height: 1.55; border-top: 1px solid var(--stroke); padding-top: 14px; }
+.foot a { color: var(--mid); }
+
+@media (max-width: 820px) {
+  .win { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; height: auto; }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--stroke); max-height: 440px; }
+  .pane { height: 480px; }
+  .win[data-tier="rail"] .cards { flex-direction: row; flex-wrap: wrap; }
+  .below { grid-template-columns: minmax(0, 1fr); }
+  .desk { height: 460px; }
+  .intro h1 { font-size: 24px; }
+  .phead .who span { display: none; }
+}
+@media (max-width: 460px) {
+  .legend { grid-template-columns: minmax(0, 1fr); }
+  .doors .door:not(.claude) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pst[data-state="waiting"]::after { animation: none; transform: scale(1.35); opacity: .45; }
+  .pst[data-state="starting"] { animation: none; }
+  .win { transition: none; }
+  .toast { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="intro">
+    <div class="brandline">
+      <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect x="20" y="44" width="15" height="34" rx="3"/><rect x="42.5" y="22" width="15" height="56" rx="3"/><rect x="65" y="36" width="15" height="42" rx="3"/><rect class="cap" x="42.5" y="5" width="15" height="13" rx="2.5"/></svg>
+      <span class="wordmark">KoA</span>
+      <span class="tagline">Simulateur</span>
+    </div>
+    <h1>Lequel de vos agents vous attend&nbsp;?</h1>
+    <p>Cinq sessions Claude Code tournent ci-dessous, sous plusieurs utilisateurs WSL. Deux vont bientôt demander une autorisation&nbsp;: répondez depuis leur vignette, sans ouvrir leur terminal. Tout est scénarisé dans ce navigateur, rien n'est exécuté.</p>
+    <p><a href="https://github.com/Happykiller/koa-releases/releases/latest">Télécharger KoA pour Windows 10 et 11</a></p>
+  </header>
+
+  <div class="controls">
+    <div class="ctl-group">
+      <span class="ctl-label" id="tierLabel">Largeur de la barre</span>
+      <div class="seg" role="group" aria-labelledby="tierLabel" id="tiers">
+        <button type="button" data-tier="rail" aria-pressed="false">Rail</button>
+        <button type="button" data-tier="compacte" aria-pressed="false">Compacte</button>
+        <button type="button" data-tier="standard" aria-pressed="true">Standard</button>
+        <button type="button" data-tier="large" aria-pressed="false">Large</button>
+      </div>
+    </div>
+    <div class="ctl-group">
+      <button type="button" class="ghost" id="btnMin">Réduire en dock</button>
+      <button type="button" class="ghost" id="btnReplay">Rejouer le scénario</button>
+    </div>
+  </div>
+
+  <section class="stage" aria-label="Fenêtre KoA simulée">
+    <div class="win" id="win" data-tier="standard">
+      <div class="titlebar">
+        <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect x="20" y="44" width="15" height="34" rx="3"/><rect x="42.5" y="22" width="15" height="56" rx="3"/><rect x="65" y="36" width="15" height="42" rx="3"/><rect class="cap" x="42.5" y="5" width="15" height="13" rx="2.5"/></svg>
+        <span class="tt">KoA</span><span class="ts">Kingdom of Agents</span>
+        <span class="sp"></span>
+        <button type="button" id="tbMin" title="Réduire : le dock prend le relais" aria-label="Réduire la fenêtre">–</button>
+      </div>
+      <aside class="sidebar">
+        <div class="sbhead"><h2>Sessions</h2><span id="count"></span></div>
+        <div class="cards" id="cards"></div>
+        <div class="sbfoot"><button type="button" id="btnCat" aria-pressed="false" title="Ouvrir depuis le catalogue"><span class="plus">＋</span><span class="lab">Ouvrir depuis le catalogue</span></button></div>
+      </aside>
+      <main class="pane">
+        <div class="view" id="vSession">
+          <div class="phead" id="phead"></div>
+          <div class="pstrip" id="pstrip"></div>
+          <div class="term" id="term" aria-live="off"></div>
+          <form class="tin" id="tform" autocomplete="off"><span>❯</span><input id="tinput" aria-label="Écrire à la session ouverte"></form>
+          <div class="tstat" id="tstat"></div>
+        </div>
+        <div class="view" id="vEmpty" hidden><div class="empty">Aucune session ouverte.<br>Ouvrez-en une depuis le catalogue.</div></div>
+        <div class="view" id="vCat" hidden>
+          <div class="cat">
+            <div class="cathead">
+              <h2>Catalogue</h2>
+              <input id="q" type="search" placeholder="⌕ Rechercher un raccourci…" aria-label="Rechercher un raccourci">
+              <button type="button" class="new" id="btnNew">+ Nouveau</button>
+            </div>
+            <div id="groups" style="display:grid;gap:18px"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="desk" id="desk" hidden>
+      <p>KoA est réduit. Le dock reste au-dessus de vos fenêtres et garde la session la plus urgente à portée de clic.</p>
+      <div class="dock" id="dock" role="region" aria-label="Dock KoA"></div>
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+  </section>
+
+  <section class="below">
+    <div class="try">
+      <h2>À essayer</h2>
+      <ul id="try">
+        <li data-k="allow"><span class="box"></span>Autorisez ou refusez une demande depuis sa vignette, sans ouvrir la session.</li>
+        <li data-k="reply"><span class="box"></span>Relancez la session en erreur en lui répondant depuis sa vignette.</li>
+        <li data-k="dock"><span class="box"></span>Réduisez la fenêtre, puis répondez à une demande depuis le dock.</li>
+        <li data-k="tiers"><span class="box"></span>Changez la largeur de la barre&nbsp;: elle montre plus ou moins selon la place.</li>
+        <li data-k="catalogue"><span class="box"></span>Ouvrez une nouvelle session depuis le catalogue.</li>
+        <li data-k="label"><span class="box"></span>Copiez l'adresse d'un agent en cliquant son label.</li>
+      </ul>
+      <div class="score" id="score"></div>
+    </div>
+    <div>
+      <h2>Les six états</h2>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <p class="foot">Simulation construite sur la direction artistique de KoA 0.30. Les textes anglais du terminal sont ceux qu'affiche Claude Code&nbsp;; KoA ne les traduit pas. KoA est une application Windows native (WinUI&nbsp;3) qui demande WSL2 et Claude Code&nbsp;: <a href="https://github.com/Happykiller/koa-releases">dépôt des versions</a>.</p>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const ETATS = {
+  waiting:  { lib: 'Autorisation', p: 1, sens: "L'agent attend votre accord. Seul état qui pulse, toujours en tête de la barre." },
+  error:    { lib: 'Erreur',       p: 2, sens: "Le tour s'est arrêté sur une erreur. Une réponse le relance." },
+  running:  { lib: 'En cours',     p: 3, sens: "L'agent travaille." },
+  starting: { lib: 'Démarrage',    p: 4, sens: 'La session s\'ouvre.' },
+  idle:     { lib: 'Inactif',      p: 5, sens: "Le tour est fini, l'agent attend une consigne." },
+  ended:    { lib: 'Terminé',      p: 6, sens: 'La session est fermée.' },
+};
+
+// Annulation : rejouer incrémente GEN, et tout sommeil d'une génération passée lève STOP.
+let GEN = 0;
+const STOP = Symbol('stop');
+const sleep = ms => { const g = GEN; return new Promise((ok, ko) => setTimeout(() => g === GEN ? ok() : ko(STOP), ms)); };
+
+const abs = s => '/home/' + s.user + s.path.slice(1);
+const T = {
+  prompt: t => `<div class="l prm">&gt; ${esc(t)}</div>`,
+  tool: (n, a) => `<div class="l"><span class="dot">●</span> <b>${n}</b>(${esc(a)})</div>`,
+  res: h => `<div class="l res">  ⎿  ${h}</div>`,
+  msg: t => `<div class="l msg"><span class="dot w">●</span> ${esc(t)}</div>`,
+  done: t => `<div class="l dim">✻ Crunched for ${t}</div>`,
+  koa: t => `<div class="l koa">  ⎿  ${esc(t)}</div>`,
+  banner: s => `<div class="l tbox ban"><span class="y">✻</span> Welcome to <b>Claude Code</b>!\n\n  cwd: ${esc(abs(s))}</div>`,
+};
+const askBash = (s, cmd, why) => ({
+  tool: 'Bash', cmd,
+  box: `<div class="l tbox perm"><b>Bash command</b>\n\n  <span class="c">${esc(cmd)}</span>\n  <span class="dim">${esc(why)}</span>\n\nDo you want to proceed?\n<span class="y">❯ 1. Yes</span>\n  2. Yes, and don't ask again for <b>${esc(cmd.split(' ').slice(0, 2).join(' '))}</b> commands in ${esc(abs(s))}\n  3. No, and tell Claude what to do differently <span class="dim">(esc)</span></div>`,
+});
+
+// ——— Les scénarios ———
+const SCRIPTS = {
+  fac: s => [
+    { w: 1800 }, { d: 'Ajoute le rendu des avoirs au gabarit PDF' }, { w: 1300 },
+    { o: [T.tool('Update', 'src/export/pdf.ts'), T.res('Updated src/export/pdf.ts with <span class="g">38 additions</span> and <span class="r">4 removals</span>')] },
+    { w: 1900 }, { d: "Écrit les tests de l'export des avoirs" }, { w: 1200 },
+    { o: [T.tool('Write', 'src/export/pdf.test.ts'), T.res('Wrote 96 lines to src/export/pdf.test.ts')] },
+    { w: 1100 }, { d: "Lance les tests du module d'export" },
+    { ask: askBash(s, 'npm test -- export', "Lance les tests du module d'export"),
+      yes: [
+        { o: [T.tool('Bash', 'npm test -- export'), T.res('<span class="g">PASS</span>  src/export/pdf.test.ts'),
+              `<div class="l res">     <span class="g">✓</span> génère un avoir au montant négatif (41 ms)</div>`,
+              `<div class="l res">     <span class="g">✓</span> rappelle la facture d'origine (12 ms)</div>`,
+              `<div class="l res">     <span class="g">✓</span> numérote l'avoir à la suite (9 ms)</div>`,
+              `<div class="l res">     … +11 tests</div>`,
+              `<div class="l res">     Tests: <span class="g">14 passed</span>, 14 total</div>`] },
+        { w: 1500 },
+        { say: "L'export PDF gère maintenant les avoirs : montant négatif, référence à la facture d'origine, numérotation continue. Les 14 tests du module passent.", t: '1m 48s' },
+      ],
+      no: [{ w: 700 }, { say: "D'accord, je ne lance pas les tests. Dites-moi si vous préférez que je les exécute autrement, ou que je passe à la suite.", t: '1m 12s' }],
+    },
+  ],
+  mig: s => [
+    { w: 2400 }, { d: 'Écrit la migration des avoirs' }, { w: 1300 },
+    { o: [T.tool('Write', 'migrations/2.4/002_avoirs.sql'), T.res('Wrote 31 lines to migrations/2.4/002_avoirs.sql')] },
+    { w: 2600 }, { d: 'Passe la migration à blanc sur la copie de prod' }, { w: 1200 },
+    { o: [T.tool('Bash', 'npm run migrate:dry -- --target=copie-prod')] },
+    { w: 2200 },
+    { err: { court: 'API Error: 529 Overloaded', long: 'API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}' } },
+  ],
+  site: s => [
+    { w: 2600 }, { p: 'Convertis les images du hero en AVIF, avec un repli JPEG' }, { st: 'running' },
+    { d: 'Recense les images du hero' }, { w: 1300 },
+    { o: [T.tool('Bash', 'ls -lh public/images/hero'), T.res('hero-1.jpg … hero-6.jpg  (6 fichiers, 4,2 Mo)')] },
+    { w: 2400 }, { d: 'Convertit les images en AVIF' }, { w: 1000 },
+    { o: [T.tool('Bash', 'npx sharp-cli -i "public/images/hero/*.jpg" -f avif -o public/images/hero'), T.res('6 images converted · <span class="g">1,2 Mo</span>')] },
+    { w: 5200 }, { d: 'Branche les AVIF dans index.html' }, { w: 1600 },
+    { ask: {
+        tool: 'Edit', cmd: 'index.html',
+        box: `<div class="l tbox perm"><b>Edit file</b>  index.html\n\n<span class="r">-  &lt;img src="images/hero/hero-1.jpg" alt="L'atelier"&gt;</span>\n<span class="g">+  &lt;picture&gt;</span>\n<span class="g">+    &lt;source srcset="images/hero/hero-1.avif" type="image/avif"&gt;</span>\n<span class="g">+    &lt;img src="images/hero/hero-1.jpg" alt="L'atelier"&gt;</span>\n<span class="g">+  &lt;/picture&gt;</span>\n\nDo you want to make this edit to <b>index.html</b>?\n<span class="y">❯ 1. Yes</span>\n  2. Yes, allow all edits during this session <span class="dim">(shift+tab)</span>\n  3. No, and tell Claude what to do differently <span class="dim">(esc)</span></div>` },
+      yes: [
+        { o: [T.tool('Update', 'index.html'), T.res('Updated index.html with <span class="g">24 additions</span> and <span class="r">6 removals</span>')] },
+        { w: 1200 },
+        { say: 'Les six images du hero sont en AVIF, 71 % plus légères, et index.html les sert dans un <picture> avec repli JPEG.', t: '2m 03s' },
+      ],
+      no: [{ w: 700 }, { say: 'Entendu, je laisse index.html tel quel. Les fichiers AVIF sont prêts dans public/images/hero si vous voulez les brancher vous-même.', t: '1m 40s' }],
+    },
+  ],
+};
+
+// La réponse à la session en erreur reprend son travail ; les autres reçoivent une réponse générique.
+const REPLIES = {
+  mig: text => [
+    { p: text }, { st: 'running' }, { d: 'Relance la vérification à blanc' }, { w: 1300 },
+    { o: [T.tool('Bash', 'npm run migrate:dry -- --target=copie-prod'),
+          T.res('<span class="g">✓</span> 001_factures_index.sql  (0,8 s)'),
+          `<div class="l res">     <span class="g">✓</span> 002_avoirs.sql          (2,1 s)</div>`,
+          `<div class="l res">     <span class="g">✓</span> 003_clients_siret.sql   (0,4 s)</div>`,
+          `<div class="l res">     Dry run OK · 3 tables, 2 index, 0 ligne supprimée</div>`] },
+    { w: 1800 },
+    { say: "La migration 2.4 passe à blanc sur la copie de prod : trois tables touchées, deux index créés, aucune ligne perdue. Rien n'a été appliqué pour de vrai.", t: '58s' },
+  ],
+};
+function generic(s, text) {
+  const st = [{ p: text }, { st: 'running' }, { d: 'Relit le contexte du projet' }, { w: 1000 },
+    { o: [T.tool('Read', 'README.md'), T.res('Read 64 lines')] }, { w: 1500 }];
+  // En mode par défaut, Claude Code demande avant toute commande : le simulateur aussi.
+  if (s.mode === 'défaut') st.push({ d: "Vérifie l'état du dépôt" }, { w: 900 },
+    { ask: askBash(s, 'git status --short', 'Liste les fichiers modifiés'),
+      yes: [{ o: [T.tool('Bash', 'git status --short'), T.res(' M src/index.ts')] }, { w: 1000 }],
+      no: [{ w: 500 }] });
+  st.push({ d: 'Prépare sa réponse' }, { w: 1500 },
+    { say: `(Simulation) Dans KoA, l'agent traiterait maintenant « ${text} » dans ${s.path}. Le scénario s'arrête ici : rejouez-le, ou ouvrez une autre session depuis le catalogue.`, t: '9s' });
+  return st;
+}
+
+const GIT = {
+  fac: { b: 'feat/export-pdf', dirty: 3, ahead: 1 },
+  site: { b: 'main' },
+  mig: { b: 'release/2.4', behind: 2 },
+  docs: { b: 'main', dirty: 1 },
+  veille: { b: 'main' },
+};
+
+function seed() {
+  const now = Date.now();
+  return [
+    { id: 'fac', name: 'facturation', label: 'export', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api',
+      git: GIT.fac, mode: 'défaut', state: 'running', since: now - 48e3, desc: 'Lit le modèle des avoirs', last: '',
+      prompt: "Ajoute l'export PDF des avoirs, avec ses tests",
+      lines: [T.prompt("Ajoute l'export PDF des avoirs, avec ses tests"),
+        T.tool('Read', 'src/export/pdf.ts'), T.res('Read 214 lines'),
+        T.tool('Read', 'src/models/avoir.ts'), T.res('Read 87 lines')] },
+    { id: 'site', name: 'site-vitrine', label: '', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine',
+      git: GIT.site, mode: 'défaut', state: 'starting', since: now, desc: '', last: '', prompt: '', lines: [] },
+    { id: 'mig', name: 'migrations', label: 'v2.4', user: 'bob', distro: 'Debian', path: '~/data/migrations',
+      git: GIT.mig, mode: 'auto', state: 'running', since: now - 95e3, desc: 'Relit les index de la table factures', last: '',
+      prompt: 'Prépare la migration 2.4 et vérifie-la à blanc sur la copie de prod',
+      lines: [T.prompt('Prépare la migration 2.4 et vérifie-la à blanc sur la copie de prod'),
+        T.tool('Read', 'migrations/2.4/001_factures_index.sql'), T.res('Read 42 lines'),
+        T.tool('Bash', 'psql -h copie-prod -c "\\d+ factures"'), T.res('Table "public.factures" · 18 columns, 4 indexes')] },
+    { id: 'docs', name: 'docs-produit', label: '', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit',
+      git: GIT.docs, mode: 'auto', state: 'idle', since: now - 4 * 60e3, desc: '',
+      last: "J'ai réécrit le guide d'installation. La section sur les distributions multiples mérite une relecture : je n'ai pas pu vérifier les captures.",
+      prompt: "Réécris le guide d'installation pour Windows 11",
+      lines: [T.prompt("Réécris le guide d'installation pour Windows 11"),
+        T.tool('Read', 'docs/installation.md'), T.res('Read 233 lines'),
+        T.tool('Update', 'docs/installation.md'), T.res('Updated docs/installation.md with <span class="g">112 additions</span> and <span class="r">57 removals</span>'),
+        T.msg("J'ai réécrit le guide d'installation. La section sur les distributions multiples mérite une relecture : je n'ai pas pu vérifier les captures."),
+        T.done('2m 05s')] },
+    { id: 'veille', name: 'veille-techno', label: '', user: 'admin', distro: 'Debian', path: '~/notes/veille',
+      git: GIT.veille, mode: 'plan', state: 'ended', since: now - 26 * 60e3, desc: '',
+      last: 'Synthèse de la semaine rangée dans notes/veille/2026-40.md.',
+      prompt: 'Résume les notes de veille de la semaine',
+      lines: [T.prompt('Résume les notes de veille de la semaine'), T.tool('Read', 'notes/veille/inbox.md'), T.res('Read 412 lines'),
+        T.tool('Write', 'notes/veille/2026-40.md'), T.res('Wrote 58 lines to notes/veille/2026-40.md'),
+        T.msg('Synthèse de la semaine rangée dans notes/veille/2026-40.md.'), T.done('3m 31s'),
+        `<div class="l dim">\nSession terminée.</div>`] },
+  ];
+}
+
+const CATALOGUE = [
+  { g: 'Clients', items: [
+    { name: 'facturation', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api', pre: 'nvm use 20', pc: '#C58BC0', git: GIT.fac },
+    { name: 'site-vitrine', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine', pre: '', pc: '#8FC7A8', git: GIT.site },
+    { name: 'migrations', user: 'bob', distro: 'Debian', path: '~/data/migrations', pre: 'source .env', pc: '#A6BEE6', git: GIT.mig },
+  ] },
+  { g: 'Interne', items: [
+    { name: 'docs-produit', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit', pre: '', pc: '#D9A9D4', git: GIT.docs },
+    { name: 'outillage', user: 'admin', distro: 'Debian', path: '~/outils', pre: 'source .venv/bin/activate', pc: '#FFC94D', git: { b: 'main', dirty: 2 } },
+    { name: 'veille-techno', user: 'admin', distro: 'Debian', path: '~/notes/veille', pre: '', pc: '#6FD3D8', git: GIT.veille },
+  ] },
+];
+
+// ——— État de la page ———
+let sessions = [], sel = 'fac', view = 'session', tier = 'standard', minimized = false, nid = 0;
+const cards = new Map();
+const live = s => sessions.includes(s);
+const cur = () => sessions.find(s => s.id === sel);
+
+// ——— Moteur ———
+async function run(s, steps) {
+  s.busy = true;
+  try { for (const st of steps) await step(s, st); }
+  catch (e) { if (e !== STOP) console.error(e); return; }
+  s.busy = false;
+}
+async function step(s, st) {
+  if (st.w) return sleep(st.w);
+  if (st.st) return setState(s, st.st);
+  if (st.p) { s.prompt = st.p; out(s, [T.prompt(st.p)]); return paneHead(); }
+  if ('d' in st) { s.desc = st.d; return touch(s); }
+  if (st.o) { for (const l of st.o) { out(s, [l]); await sleep(150); } return; }
+  if (st.err) {
+    s.desc = st.err.court;
+    out(s, [`<div class="l err">  ⎿  ${esc(st.err.long)}</div>`]);
+    return setState(s, 'error');
+  }
+  if (st.say) {
+    s.last = st.say; s.desc = '';
+    out(s, [T.msg(st.say), T.done(st.t || '30s')]);
+    return setState(s, 'idle');
+  }
+  if (st.ask) {
+    s.ask = st.ask;
+    out(s, [st.ask.box]);
+    setState(s, 'waiting');
+    announce(s);
+    const r = await new Promise(ok => { s.resolve = ok; });
+    if (!live(s)) throw STOP;
+    s.ask = null;
+    out(s, [T.koa(`${r.yes ? 'Autorisé' : 'Refusé'} ${({ card: 'depuis la vignette', dock: 'depuis le dock', term: 'dans le terminal' })[r.src]}`)]);
+    setState(s, 'running');
+    for (const b of (r.yes ? st.yes : st.no)) await step(s, b);
+  }
+}
+function setState(s, k) {
+  if (!live(s)) return;
+  s.state = k; s.since = Date.now();
+  renderSidebar(); paneHead(); renderDock();
+}
+function touch(s) { if (live(s)) { updCard(s); if (s.id === sel) paneHead(); renderDock(); } }
+function out(s, lines) {
+  s.lines.push(...lines);
+  if (s.id !== sel || view !== 'session' || !live(s)) return;
+  const t = $('#term');
+  const stick = t.scrollHeight - t.scrollTop - t.clientHeight < 60;
+  t.insertAdjacentHTML('beforeend', lines.join(''));
+  if (stick) t.scrollTop = t.scrollHeight;
+}
+
+function decide(s, yes, src) {
+  if (!s || s.state !== 'waiting' || !s.resolve) return;
+  const r = s.resolve; s.resolve = null;
+  r({ yes, src });
+  if (src === 'card') done('allow');
+  if (src === 'dock') done('dock');
+}
+function reply(s, text, src) {
+  text = text.trim();
+  if (!s || !text) return false;
+  if (s.state === 'waiting') {
+    if (/^[12]$/.test(text)) { decide(s, true, src === 'term' ? 'term' : src); return true; }
+    if (text === '3') { decide(s, false, src === 'term' ? 'term' : src); return true; }
+    toast(`${s.name} attend d'abord votre réponse à sa demande d'autorisation.`, s); return false;
+  }
+  if (s.state === 'ended') { toast(`${s.name} est terminée : rouvrez son contexte depuis le catalogue.`); return false; }
+  if (s.busy || s.state === 'running' || s.state === 'starting') {
+    toast(`${s.name} travaille encore. Réessayez quand elle sera inactive.`); return false;
+  }
+  const steps = (REPLIES[s.id] && s.state === 'error') ? REPLIES[s.id](text) : generic(s, text);
+  if (s.state === 'error' && src === 'card') done('reply');
+  run(s, steps);
+  return true;
+}
+
+// ——— Barre latérale ———
+const TRUNC = { compacte: 24, standard: 30, large: 46 };
+function midTrunc(p, n) {
+  if (!n || p.length <= n) return p;
+  const k = n - 1, a = Math.ceil(k * .4);
+  return p.slice(0, a) + '…' + p.slice(p.length - (k - a));
+}
+function gitHtml(g) {
+  let h = `<span class="gb">⎇ ${esc(g.b)}</span>`;
+  if (g.dirty) h += ` <span class="gd" title="${g.dirty} à committer">●${g.dirty}</span>`;
+  if (g.behind) h += ` <span class="gl" title="${g.behind} à récupérer">↓${g.behind}</span>`;
+  if (g.ahead) h += ` <span class="ga" title="${g.ahead} à pousser">↑${g.ahead}</span>`;
+  if (!g.dirty && !g.behind && !g.ahead) h += ` <span class="gc">✓ propre</span>`;
+  return h;
+}
+function dur(s) {
+  const v = Math.max(0, Math.floor((Date.now() - s.since) / 1000));
+  return v < 60 ? `${v} s` : v < 3600 ? `${Math.floor(v / 60)} min` : `${Math.floor(v / 3600)} h`;
+}
+const address = s => '@' + s.name + (s.label ? '-' + s.label : '');
+
+function cardFor(s) {
+  let el = cards.get(s.id);
+  if (el) return el;
+  el = document.createElement('article');
+  el.className = 'card'; el.tabIndex = 0; el.dataset.id = s.id;
+  el.innerHTML = `
+    <div class="r1"><span class="pst"></span><span class="nm"></span><button type="button" class="lbl"></button><span class="kind">Claude</span><span class="sp"></span><button type="button" class="x" aria-label="Fermer la session" title="Fermer la session">×</button></div>
+    <div class="r2"><span class="ud"></span>  <span class="path"></span></div>
+    <div class="r3"></div>
+    <div class="r4"><span class="st"></span><span>·</span><span class="dur"></span><span class="mode"></span><span class="sp"></span><button type="button" class="rbtn">Répondre</button></div>
+    <div class="act"><div class="desc"></div><div class="last"></div></div>
+    <div class="ask" hidden><div class="askt">Demande une autorisation :</div><div class="askq"></div><div class="askc"></div>
+      <div class="btns"><button type="button" class="allow">Autoriser</button><button type="button" class="deny">Refuser</button></div></div>
+    <form class="reply" hidden><input aria-label="Réponse à la session"><button type="submit">Envoyer</button></form>`;
+  const S = () => sessions.find(x => x.id === s.id);
+  el.addEventListener('click', e => {
+    if (e.target.closest('button, input, form')) return;
+    select(s.id);
+  });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target === el) select(s.id); });
+  $('.allow', el).addEventListener('click', () => decide(S(), true, 'card'));
+  $('.deny', el).addEventListener('click', () => decide(S(), false, 'card'));
+  $('.x', el).addEventListener('click', () => closeSession(S()));
+  $('.lbl', el).addEventListener('click', () => {
+    const x = S(); if (!x) return;
+    if (!x.label) { x.label = 'moi'; updCard(x); }
+    const a = address(x);
+    const ok = () => { toast(`Adresse ${a} copiée : c'est le nom sous lequel les autres sessions parlent à cet agent.`); done('label'); };
+    try { navigator.clipboard.writeText(a).then(ok, ok); } catch { ok(); }
+  });
+  const form = $('.reply', el), inp = $('input', form);
+  $('.rbtn', el).addEventListener('click', () => {
+    form.hidden = !form.hidden;
+    if (!form.hidden) { inp.placeholder = `Répondre à ${s.name}…`; inp.focus(); }
+  });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (reply(S(), inp.value, 'card')) { inp.value = ''; form.hidden = true; }
+  });
+  cards.set(s.id, el);
+  return el;
+}
+function updCard(s) {
+  const el = cardFor(s);
+  el.dataset.state = s.state;
+  $('.pst', el).dataset.state = s.state;
+  el.classList.toggle('sel', s.id === sel && view === 'session');
+  el.title = tier === 'rail' ? `${s.name} · ${ETATS[s.state].lib}` : '';
+  el.setAttribute('aria-label', `${s.name}, ${ETATS[s.state].lib}`);
+  $('.nm', el).textContent = s.name;
+  const lbl = $('.lbl', el);
+  lbl.textContent = s.label ? s.label : '+ label';
+  lbl.title = s.label ? `Copier l'adresse ${address(s)}` : 'Donner un label et copier l\'adresse';
+  $('.ud', el).textContent = `${s.user}@${s.distro}`;
+  $('.path', el).textContent = midTrunc(s.path, TRUNC[tier]);
+  $('.path', el).title = s.path;
+  $('.r3', el).innerHTML = gitHtml(s.git);
+  $('.st', el).textContent = ETATS[s.state].lib;
+  $('.dur', el).textContent = dur(s);
+  $('.mode', el).textContent = s.mode;
+  const d = $('.desc', el), l = $('.last', el);
+  d.textContent = s.desc; d.hidden = !s.desc;
+  l.textContent = s.last; l.hidden = !s.last || s.state === 'running' || s.state === 'waiting';
+  $('.act', el).hidden = d.hidden && l.hidden;
+  const ask = $('.ask', el);
+  ask.hidden = s.state !== 'waiting' || !s.ask;
+  if (!ask.hidden) {
+    $('.askq', el).textContent = `Claude needs your permission to use ${s.ask.tool}`;
+    $('.askc', el).textContent = s.ask.cmd;
+  }
+}
+// Une demande d'autorisation passe en tête, la plus ancienne d'abord ; le reste garde l'ordre de la barre.
+function order() {
+  const w = sessions.filter(s => s.state === 'waiting').sort((a, b) => a.since - b.since);
+  return [...w, ...sessions.filter(s => s.state !== 'waiting')];
+}
+function urgent() {
+  return [...sessions].sort((a, b) => ETATS[a.state].p - ETATS[b.state].p || a.since - b.since)[0];
+}
+function renderSidebar() {
+  const list = $('#cards');
+  const ord = order();
+  const before = new Map();
+  if (!reduce) for (const [id, el] of cards) if (el.isConnected) before.set(id, el.getBoundingClientRect().top);
+  for (const [id, el] of cards) if (!sessions.some(s => s.id === id)) { el.remove(); cards.delete(id); }
+  ord.forEach(updCard);
+  const now = [...list.children].map(e => e.dataset.id).join();
+  if (now !== ord.map(s => s.id).join()) {
+    ord.forEach(s => list.appendChild(cardFor(s)));
+    if (!reduce) for (const s of ord) {
+      const el = cards.get(s.id), b = before.get(s.id);
+      if (b == null) continue;
+      const dy = b - el.getBoundingClientRect().top;
+      if (Math.abs(dy) > 1) el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    }
+  }
+  $('#count').textContent = `${sessions.length} session${sessions.length > 1 ? 's' : ''}`;
+  $('#btnCat').setAttribute('aria-pressed', String(view === 'catalogue'));
+}
+
+// ——— Panneau ———
+function select(id) {
+  sel = id; view = 'session';
+  if (minimized) setMin(false);
+  renderSidebar(); renderPane();
+}
+function renderPane() {
+  const s = cur();
+  $('#vCat').hidden = view !== 'catalogue';
+  $('#vSession').hidden = view !== 'session' || !s;
+  $('#vEmpty').hidden = view !== 'session' || !!s;
+  if (view !== 'session' || !s) return;
+  paneHead();
+  const t = $('#term');
+  t.innerHTML = s.lines.join('');
+  t.scrollTop = t.scrollHeight;
+  $('#tinput').placeholder = `Écrire à ${s.name}…`;
+  $('#tstat').innerHTML = `<span class="c">⎇ ${esc(s.git.b)}</span>  |  cwd: ${esc(abs(s))}\n` +
+    (s.mode === 'auto' ? `<span class="y">⏵⏵ auto mode on</span> (shift+tab to cycle)` : s.mode === 'plan' ? `<span class="c">⏸ plan mode on</span> (shift+tab to cycle)` : '? for shortcuts');
+  $('#tstat').style.whiteSpace = 'pre';
+}
+function paneHead() {
+  const s = cur();
+  if (!s || view !== 'session') return;
+  $('#phead').innerHTML = `
+    <span class="pst" data-state="${s.state}"></span>
+    <div class="who"><b>${esc(s.name)}</b><span>${esc(s.user)}@${esc(s.distro)}  ${esc(s.path)}</span></div>
+    <span class="stp" data-state="${s.state}">${ETATS[s.state].lib} · ${dur(s)}</span>
+    <div class="doors">
+      <button type="button" class="door claude" data-m="claude" title="Nouvelle session Claude dans ce contexte">✦</button>
+      <button type="button" class="door" data-m="term" title="Terminal">›_</button>
+      <button type="button" class="door" data-m="code" title="VS Code">‹›</button>
+      <button type="button" class="door" data-m="explorer" title="Explorateur Windows">▤</button>
+    </div>`;
+  $('#pstrip').textContent = s.prompt || 'Aucune demande pour l\'instant';
+}
+$('#phead').addEventListener('click', e => {
+  const b = e.target.closest('.door'); const s = cur();
+  if (b && s) openMode(b.dataset.m, s);
+});
+$('#tform').addEventListener('submit', e => {
+  e.preventDefault();
+  const i = $('#tinput');
+  if (reply(cur(), i.value, 'term')) i.value = '';
+});
+
+// ——— Catalogue ———
+function renderCatalogue() {
+  const q = $('#q').value.trim().toLowerCase();
+  const host = $('#groups');
+  let html = '', n = 0;
+  CATALOGUE.forEach((grp, gi) => {
+    const items = grp.items.map((e, i) => ({ e, i })).filter(({ e }) => !q || `${e.name} ${e.user}@${e.distro} ${e.path}`.toLowerCase().includes(q));
+    if (!items.length) return;
+    n += items.length;
+    html += `<div class="grp"><h3>${esc(grp.g)} <span>${items.length}</span></h3><div class="entries">` +
+      items.map(({ e, i }) => `
+        <div class="entry" data-g="${gi}" data-i="${i}">
+          <span class="hdl" aria-hidden="true">⠿</span>
+          <span class="en"><span class="chip" style="--pc:${e.pc}"></span>${esc(e.name)}</span>
+          <span class="more" aria-hidden="true">⋯</span>
+          <span class="em">${esc(e.user)}@${esc(e.distro)} · ${esc(e.path)}${e.pre ? ' · ' + esc(e.pre) : ''}</span>
+          <div class="modes">
+            <button type="button" class="claude" data-m="claude">✦ Claude</button>
+            <button type="button" class="door" data-m="term" title="Terminal">›_</button>
+            <button type="button" class="door" data-m="code" title="VS Code">‹›</button>
+            <button type="button" class="door" data-m="explorer" title="Explorateur Windows">▤</button>
+          </div>
+        </div>`).join('') + `</div></div>`;
+  });
+  host.innerHTML = n ? html : `<p class="nores">Aucun raccourci ne correspond à « ${esc(q)} ».</p>`;
+}
+$('#groups').addEventListener('click', e => {
+  const b = e.target.closest('button[data-m]'); if (!b) return;
+  const en = b.closest('.entry');
+  openMode(b.dataset.m, CATALOGUE[en.dataset.g].items[en.dataset.i]);
+});
+$('#q').addEventListener('input', renderCatalogue);
+$('#btnNew').addEventListener('click', () => toast('Dans KoA, le formulaire d\'un nouveau raccourci glisse à droite : distro, utilisateur, répertoire, commande de pré-lancement.'));
+$('#btnCat').addEventListener('click', () => {
+  view = view === 'catalogue' ? 'session' : 'catalogue';
+  renderSidebar(); renderPane();
+  if (view === 'catalogue') renderCatalogue();
+});
+
+function openMode(m, ctx) {
+  if (m === 'claude') return launch(ctx);
+  const msg = {
+    term: `Dans KoA, ce bouton ouvre un shell nu dans ${ctx.path}, sans agent.`,
+    code: `Dans KoA, ce bouton ouvre ${ctx.path} dans VS Code, via Remote-WSL.`,
+    explorer: `Dans KoA, ce bouton ouvre ${ctx.path} dans l'Explorateur Windows.`,
+  }[m];
+  toast(msg);
+}
+function launch(ctx) {
+  const d = new Date();
+  const s = {
+    id: 'n' + (++nid), name: ctx.name, label: `${d.getHours()}h${String(d.getMinutes()).padStart(2, '0')}`,
+    user: ctx.user, distro: ctx.distro, path: ctx.path, git: ctx.git || { b: 'main' }, mode: 'défaut',
+    state: 'starting', since: Date.now(), desc: '', last: '', prompt: '', lines: [],
+  };
+  // Les nouvelles sessions arrivent en haut de la barre.
+  sessions.unshift(s);
+  sel = s.id; view = 'session';
+  if (minimized) setMin(false);
+  renderSidebar(); renderPane(); renderDock();
+  done('catalogue');
+  run(s, [{ o: [T.banner(s)] }, { w: 2200 }, { st: 'idle' }]).then(() => { if (sel === s.id) $('#tinput').focus(); });
+}
+function closeSession(s) {
+  if (!s) return;
+  sessions = sessions.filter(x => x !== s);
+  if (s.resolve) s.resolve = null;
+  if (sel === s.id) sel = (order()[0] || {}).id;
+  renderSidebar(); renderPane(); renderDock();
+  toast(`Session ${s.name} fermée. « Rejouer le scénario » la fait revenir.`);
+}
+
+// ——— Dock ———
+function setMin(v) {
+  minimized = v;
+  $('#win').hidden = v; $('#desk').hidden = !v;
+  $('#btnMin').textContent = v ? 'Rouvrir la fenêtre' : 'Réduire en dock';
+  renderDock();
+}
+function renderDock() {
+  if (!minimized) return;
+  const c = st => sessions.filter(s => s.state === st).length;
+  const nw = c('waiting'), ne = c('error'), nr = c('running') + c('starting'), ni = c('idle');
+  const part = (n, st, one, many) => `<span class="${n ? 'on' : ''}"><span class="pst" data-state="${st}"></span>${n} ${n > 1 ? many : one}</span>`;
+  const u = urgent();
+  let act = '';
+  if (u && u.state === 'waiting') act = `<span class="dreq" title="${esc(u.ask.cmd)}">${esc(u.ask.tool)} · ${esc(u.ask.cmd)}</span><div class="dact"><button type="button" class="allow" data-a="yes">Autoriser</button><button type="button" class="deny" data-a="no">Refuser</button></div>`;
+  else if (u) act = `<div class="dact"><button type="button" class="deny" data-a="open">Ouvrir</button></div>`;
+  $('#dock').innerHTML = `
+    <span class="dlogo"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect x="20" y="44" width="15" height="34" rx="3"/><rect x="42.5" y="22" width="15" height="56" rx="3"/><rect x="65" y="36" width="15" height="42" rx="3"/><rect class="cap" x="42.5" y="5" width="15" height="13" rx="2.5"/></svg>KoA</span>
+    <span class="dcounts">${part(nw, 'waiting', 'attend', 'attendent')}${ne ? part(ne, 'error', 'en erreur', 'en erreur') : ''}${part(nr, 'running', 'actif', 'actifs')}${part(ni, 'idle', 'au repos', 'au repos')}</span>
+    ${u ? `<span class="dsep"></span><span class="dname">${esc(u.name)}</span>${act}` : ''}`;
+  $('#dock').dataset.id = u ? u.id : '';
+}
+$('#dock').addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const s = sessions.find(x => x.id === $('#dock').dataset.id); if (!s) return;
+  if (b.dataset.a === 'open') return select(s.id);
+  decide(s, b.dataset.a === 'yes', 'dock');
+});
+$('#btnMin').addEventListener('click', () => setMin(!minimized));
+$('#tbMin').addEventListener('click', () => setMin(true));
+
+// ——— Notifications ———
+function toast(text, s) {
+  const host = $('#toasts');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = (s ? `<span class="pst" data-state="${s.state}"></span>` : '') + `<p>${esc(text)}</p>` + (s ? `<button type="button">Voir</button>` : '');
+  if (s) $('button', el).addEventListener('click', () => { el.remove(); if (live(s)) select(s.id); });
+  host.appendChild(el);
+  while (host.children.length > 3) host.firstChild.remove();
+  setTimeout(() => el.remove(), 6000);
+}
+function announce(s) {
+  if (!minimized && s.id === sel && view === 'session') return;
+  toast(`${s.name} demande une autorisation : ${s.ask.tool} · ${s.ask.cmd}`, s);
+}
+
+// ——— Liste « à essayer » ———
+function done(k) {
+  const li = $(`#try li[data-k="${k}"]`);
+  if (!li || li.classList.contains('ok')) return;
+  li.classList.add('ok');
+  const n = document.querySelectorAll('#try li.ok').length, t = document.querySelectorAll('#try li').length;
+  $('#score').textContent = n === t ? 'Tout y est. Le vrai KoA fait la même chose avec vos propres sessions.' : `${n} sur ${t}`;
+}
+
+// ——— Largeurs ———
+$('#tiers').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tier]'); if (!b) return;
+  tier = b.dataset.tier;
+  $('#win').dataset.tier = tier;
+  document.querySelectorAll('#tiers button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  if (tier !== 'standard') done('tiers');
+  renderSidebar();
+});
+
+// ——— Légende ———
+$('#legend').innerHTML = Object.entries(ETATS).map(([k, e]) =>
+  `<div class="lg" data-state="${k}"><span class="pst" data-state="${k}"></span><b>${e.lib}</b><span>${e.sens}</span></div>`).join('');
+
+// ——— Démarrage ———
+function start() {
+  GEN++;
+  for (const el of cards.values()) el.remove();
+  cards.clear();
+  sessions = seed();
+  sel = 'fac'; view = 'session';
+  $('#toasts').innerHTML = '';
+  $('#q').value = '';
+  renderSidebar(); renderPane(); renderDock();
+  const site = sessions.find(s => s.id === 'site');
+  site.lines.push(T.banner(site));
+  if (sel === 'site') renderPane();
+  for (const s of sessions) if (SCRIPTS[s.id]) run(s, SCRIPTS[s.id](s));
+}
+$('#btnReplay').addEventListener('click', start);
+
+setInterval(() => {
+  for (const s of sessions) { const el = cards.get(s.id); if (el) $('.dur', el).textContent = dur(s); }
+  const s = cur();
+  if (s && view === 'session') { const p = $('#phead .stp'); if (p) p.textContent = `${ETATS[s.state].lib} · ${dur(s)}`; }
+}, 1000);
+
+start();
+})();
+</script>
+
+</body>
+</html>

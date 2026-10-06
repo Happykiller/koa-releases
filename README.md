@@ -11,7 +11,7 @@
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011%20·%20x64-86A2D6?style=flat-square)
 ![WSL2](https://img.shields.io/badge/WSL2%20%2B%20Claude%20Code-requis-6FA98C?style=flat-square)
 
-**[⬇ &nbsp;Télécharger la dernière version](../../releases/latest)**
+**[⬇ &nbsp;Télécharger la dernière version](../../releases/latest)** &nbsp;·&nbsp; **[▶ &nbsp;Essayer dans le navigateur](https://happykiller.github.io/koa-releases/)**
 
 <img src="assets/vue-sessions.png" width="850" alt="KoA : la barre latérale à gauche — une session attend une autorisation, une travaille, une a fini — et à droite le terminal de la session ouverte, où l'agent rend son rapport" />
 

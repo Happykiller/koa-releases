@@ -53,22 +53,32 @@ de la barre latérale. Une session bloquée sur une permission ne peut pas se no
   vignette, deux boutons suffisent. Et quand la fenêtre est réduite, le **dock** garde la
   session la plus urgente à portée de clic :
 
-  <img src="assets/dock.png" width="620" alt="Le dock : compteurs d'état, la session la plus urgente, et les boutons Autoriser / Refuser" />
+  <img src="assets/dock.png" width="689" alt="Le dock : compteurs d'état, la session la plus urgente, et les boutons Autoriser / Refuser" />
 
 - **Répondre à un agent depuis sa vignette** — sans quitter ce que vous étiez en train de faire.
 - **Un vrai terminal** — chaque session vit dans un terminal complet, au thème assorti à
   l'application, pas dans un aperçu.
 - **Un catalogue de raccourcis** — distro, utilisateur, répertoire, commande de pré-lancement ;
   groupes réordonnables, couleur et icône par projet, recherche, lancement rapide sans rien
-  enregistrer. Et **quatre façons d'ouvrir chaque contexte** : avec Claude, en shell nu, dans
-  VS Code, ou dans l'Explorateur Windows.
+  enregistrer. Et **plusieurs façons d'ouvrir chaque contexte** : avec Claude (ou Codex, ou
+  Claude isolé dans un worktree git), en shell nu, dans VS Code, ou dans l'Explorateur Windows.
 
-  <img src="assets/catalogue.png" width="850" alt="Le catalogue : des raccourcis groupés, colorés et iconés, chacun portant ses quatre modes d'ouverture — Claude, terminal, VS Code, Explorateur" />
+  <img src="assets/catalogue.png" width="850" alt="Le catalogue en cartes : des raccourcis rangés en groupes repliables, colorés, iconés et décrits, chacun portant son bouton Claude scindé, puis terminal, VS Code et Explorateur" />
 
-- **Reprendre une conversation** — relire le transcript d'une session passée et repartir où
-  l'agent s'était arrêté. Au redémarrage, KoA propose de rouvrir les sessions restées ouvertes :
+- **Une adresse par session** — chaque agent Claude porte son `@contexte-label`, copiable d'un
+  clic : le nom sous lequel les autres sessions du poste peuvent lui parler.
+- **Claude, Codex ou terminal, d'un coup d'œil** — chaque vignette porte son étiquette, et
+  **Codex** s'ouvre dans vos contextes comme Claude (sans supervision d'état : il n'émet pas les
+  signaux qu'elle exige).
+- **Un catalogue qui se range** — raccourcis et groupes déplaçables, groupes repliables,
+  renommables, fusionnables ; une description par raccourci ; les sessions récentes en première
+  section, et une seule recherche pour tout.
+- **Mises à jour sans couper vos agents** — le démon qui tient les sessions survit à
+  l'installation : seule la fenêtre se ferme.
+- **Reprendre une conversation** — repartir où l'agent s'était arrêté, depuis les sessions
+  récentes du catalogue. Au redémarrage, KoA propose de rouvrir les sessions restées ouvertes :
 
-  <img src="assets/accueil.png" width="850" alt="La page d'accueil de KoA : le bandeau de reprise propose de rouvrir les trois sessions ouvertes à la dernière fermeture" />
+  <img src="assets/accueil.png" width="850" alt="La page d'accueil de KoA : le bandeau de reprise propose de rouvrir les quatre sessions ouvertes à la dernière fermeture" />
 - **Multi-utilisateurs, multi-distros** — chaque session tourne sous l'utilisateur et la
   distribution WSL de son projet, sans se marcher dessus.
 

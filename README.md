@@ -11,7 +11,7 @@
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011%20·%20x64-86A2D6?style=flat-square)
 ![WSL2](https://img.shields.io/badge/WSL2%20%2B%20Claude%20Code-requis-6FA98C?style=flat-square)
 
-**[⬇ &nbsp;Télécharger la dernière version](../../releases/latest)** &nbsp;·&nbsp; **[▶ &nbsp;Essayer dans le navigateur](https://happykiller.github.io/koa-releases/)**
+**[⬇ &nbsp;Télécharger la dernière version](../../releases/latest)** &nbsp;·&nbsp; **[▶ &nbsp;Essayer dans le navigateur](https://happykiller.github.io/koa-releases/)** &nbsp;·&nbsp; **[◆ &nbsp;Le framework agentique](https://happykiller.github.io/koa-releases/architecture.html)**
 
 <img src="assets/vue-sessions.png" width="850" alt="KoA : la barre latérale à gauche — une session attend une autorisation, une travaille, une a fini — et à droite le terminal de la session ouverte, où l'agent rend son rapport" />
 
@@ -31,6 +31,14 @@ KoA est une application **Windows native** (WinUI 3) qui réunit tout ça dans u
 | **Supervision** | l'état de toutes les sessions en un coup d'œil, même fenêtre réduite |
 | **Sollicitation** | parler à une session précise sans aller la chercher |
 | **Orchestration** | coordonner le travail entre agents, éviter les conflits |
+
+## Organiser ses agents : le framework agentique
+
+Une équipe d'agents pour tous vos projets, ou une par projet ? Où ranger le contexte, les skills
+génériques, les skills de déploiement ? KoA répond par un framework : **une équipe définie une fois,
+instanciée par frontière de confiance**, et cloisonnée par les accès plutôt que par la consigne.
+Vos agents le lisent dans la librairie (`koa/architecture`) ; vous, en schémas sur
+**[sa page dédiée](https://happykiller.github.io/koa-releases/architecture.html)**.
 
 ## Le langage d'état
 

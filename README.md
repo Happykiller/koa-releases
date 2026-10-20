@@ -85,6 +85,13 @@ d'un autre espace. Une session bloquée sur une permission ne peut pas se noyer 
 - **Un catalogue qui se range** — raccourcis et groupes déplaçables, groupes repliables,
   renommables, fusionnables ; une description par raccourci ; les sessions récentes en première
   section, et une seule recherche pour tout.
+- **Un raccourci se règle en le regardant** — sa carte se dessine pendant la saisie : couleur,
+  icône, cluster, ce qu'il impose à ses agents. Une centaine d'icônes cherchables, une couleur
+  libre si la palette ne suffit pas — à condition qu'elle reste mate, pour ne jamais se lire comme
+  un état :
+
+  <img src="assets/formulaire.png" width="850" alt="Le formulaire d'un raccourci : l'aperçu de sa carte en tête, les rangées de couleurs et d'icônes, puis deux colonnes — contexte d'un côté, rangement et agent de l'autre — et la section Avancé repliée" />
+
 - **Mises à jour sans couper vos agents** — le démon qui tient les sessions survit à
   l'installation : seule la fenêtre se ferme.
 - **Reprendre une conversation** — repartir où l'agent s'était arrêté, depuis les sessions

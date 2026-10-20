@@ -258,6 +258,49 @@ button { cursor: pointer; }
 .modes .door { height: 30px; }
 .nores { color: var(--mid); }
 
+/* Le formulaire d'un raccourci (KoA 1.13) : une boîte au-dessus du catalogue, deux colonnes sous un aperçu. */
+.fdlg { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px; background: rgba(0,0,0,.45); }
+.fbox { width: min(760px, 100%); max-height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--bg-canvas); border: 1px solid var(--stroke-hi); border-radius: 12px; box-shadow: var(--shadow); }
+.fhead { display: flex; align-items: start; gap: 10px; padding: 16px 18px 6px; }
+.fhead h2 { margin: 0; font: 600 16px/22px var(--ui); }
+.fhead p { margin: 2px 0 0; color: var(--lo); font-size: 11.5px; }
+.fhead .x { margin-left: auto; border: 0; background: transparent; color: var(--lo); padding: 4px 8px; border-radius: 6px; }
+.fbody { overflow-y: auto; padding: 6px 18px 16px; display: grid; gap: 16px; }
+.fprev { background: var(--bg-elev); border: 1px solid var(--stroke); border-radius: 10px; padding: 12px 14px; display: grid; gap: 12px; }
+.fcard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
+.fpast { width: 40px; height: 40px; border-radius: 10px; border: 2px solid var(--pc, var(--stroke)); background: color-mix(in srgb, var(--pc, transparent) 16%, transparent); display: grid; place-items: center; color: var(--pc, var(--mid)); font-weight: 600; }
+.fname { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 600; }
+.fname .cl { font: 10.5px var(--mono); color: var(--mid); border: 1px solid var(--stroke); border-radius: 4px; padding: 0 6px; font-weight: 400; }
+.fname .gr { color: var(--lo); font-weight: 400; font-size: 12px; }
+.ftgt { font: 11px var(--mono); color: var(--lo); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fres { font-size: 11px; color: var(--mid); }
+.fcols { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.fcols button, .fcols label { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--stroke); background: var(--bg-panel); display: grid; place-items: center; padding: 0; }
+.fcols button[aria-pressed="true"], .fcols label[data-on="true"] { border: 2px solid var(--brand); }
+.fcols .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--c); }
+.fcols label { position: relative; cursor: pointer; }
+.fcols label input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.fsouci { font-size: 11.5px; color: var(--s-err); }
+.fsouci:empty { display: none; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px 26px; }
+.fcol { display: grid; gap: 10px; align-content: start; }
+.fcol h3 { margin: 0; font: 600 10.5px/1 var(--ui); letter-spacing: .1em; text-transform: uppercase; color: var(--lo); }
+.fl { display: grid; gap: 5px; font-size: 11.5px; color: var(--mid); }
+.fl input, .fl select { border: 1px solid var(--stroke); background: var(--bg-panel); color: var(--hi); border-radius: 6px; padding: 6px 8px; min-width: 0; }
+.fl input.mono { font: 12px var(--mono); }
+.fduo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fadv { border: 1px solid var(--stroke); border-radius: 8px; background: var(--bg-panel); }
+.fadv summary { cursor: pointer; display: flex; gap: 12px; padding: 10px 12px; font: 600 10.5px/16px var(--ui); letter-spacing: .1em; text-transform: uppercase; color: var(--lo); }
+.fadv summary span { margin-left: auto; font: 400 11.5px/16px var(--ui); letter-spacing: 0; text-transform: none; }
+.fadv .fl { padding: 0 12px 12px; }
+.ffoot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--stroke); }
+.ffoot button { border: 1px solid var(--stroke-hi); background: var(--bg-elev); border-radius: 6px; padding: 6px 14px; }
+.ffoot .del { border-color: transparent; background: transparent; color: var(--s-err); }
+.ffoot .hint { margin-left: auto; color: var(--s-wait); font-size: 12px; }
+.ffoot .save { border-color: var(--gold); background: var(--gold); color: var(--on-gold); font-weight: 600; }
+.entry .more { border: 0; background: transparent; padding: 0 4px; border-radius: 4px; color: var(--lo); }
+.entry .more:hover { background: var(--bg-hover); color: var(--hi); }
+
 /* Le bureau, quand KoA est réduit */
 .desk { height: 680px; border-radius: 10px; border: 1px dashed var(--stroke-hi); background: var(--desk); display: grid; grid-template-rows: 1fr auto; padding: 24px 16px; gap: 16px; }
 .desk p { margin: 0; align-self: center; text-align: center; color: var(--mid); max-width: 52ch; justify-self: center; line-height: 1.55; }
@@ -391,6 +434,65 @@ button { cursor: pointer; }
       <div class="dock" id="dock" role="region" aria-label="Dock KoA"></div>
     </div>
 
+
+    <!-- Le formulaire d'un raccourci (KoA 1.13) : il ne glisse plus à droite, il se pose au-dessus. -->
+    <div class="fdlg" id="fdlg" hidden>
+      <div class="fbox" role="dialog" aria-modal="true" aria-labelledby="fTitle">
+        <div class="fhead">
+          <div><h2 id="fTitle">Nouveau raccourci</h2><p id="fSub"></p></div>
+          <button type="button" class="x" id="fX" aria-label="Fermer sans enregistrer">✕</button>
+        </div>
+        <div class="fbody">
+          <div class="fprev">
+            <div class="fcard">
+              <span class="fpast" id="pPast"></span>
+              <div style="display:grid;gap:3px;min-width:0">
+                <div class="fname"><span id="pName"></span><span class="cl" id="pCl"></span><span class="gr" id="pGr"></span></div>
+                <div class="ftgt" id="pTgt"></div>
+                <div class="fres" id="pRes"></div>
+              </div>
+            </div>
+            <div class="fcols" id="fCols" role="group" aria-label="Couleur du projet"></div>
+            <div class="fsouci" id="fSouci" aria-live="polite"></div>
+          </div>
+          <div class="fgrid">
+            <div class="fcol">
+              <h3>Contexte</h3>
+              <label class="fl">Nom<input id="fName" placeholder="ex. api-facturation"></label>
+              <div class="fduo">
+                <label class="fl">Distro<select id="fDistro"><option>Debian</option><option>Ubuntu</option></select></label>
+                <label class="fl">Utilisateur<input id="fUser" value="admin"></label>
+              </div>
+              <label class="fl">Répertoire dans la distro<input id="fPath" class="mono" placeholder="ex. ~/projets/api"></label>
+            </div>
+            <div class="fcol">
+              <h3>Rangement</h3>
+              <div class="fduo">
+                <label class="fl">Groupe du catalogue<input id="fGrp" placeholder="ex. Clients"></label>
+                <label class="fl">Cluster — son onglet<select id="fCl"><option value="poste">aucun : le poste</option><option>produit</option><option>vitrine</option></select></label>
+              </div>
+              <h3 style="margin-top:6px">Agent</h3>
+              <div class="fduo">
+                <label class="fl">Mode<select id="fMode"><option value="">Hériter du défaut (Plan)</option><option>Plan</option><option>Édition auto</option><option>Sans garde-fou</option></select></label>
+                <label class="fl">Modèle<select id="fModel"><option value="">Celui de Claude Code</option><option>Opus</option><option>Sonnet</option></select></label>
+              </div>
+            </div>
+          </div>
+          <details class="fadv" id="fAdv">
+            <summary>Avancé<span id="fAdvRes"></span></summary>
+            <label class="fl">Commande avant le lancement — souvent posée par une seed<input id="fPre" class="mono" placeholder="ex. nvm use 20"></label>
+          </details>
+        </div>
+        <div class="ffoot">
+          <button type="button" class="del" id="fDel">Supprimer le raccourci</button>
+          <button type="button" id="fRun" title="Ouvre ce contexte une fois : rien n'est ajouté au catalogue">Lancer sans enregistrer</button>
+          <span class="hint" id="fHint"></span>
+          <button type="button" id="fCancel">Annuler</button>
+          <button type="button" class="save" id="fSave">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
     <div class="toasts" id="toasts" aria-live="polite"></div>
   </section>
 
@@ -405,6 +507,7 @@ button { cursor: pointer; }
         <li data-k="catalogue"><span class="box"></span>Ouvrez une nouvelle session depuis le catalogue.</li>
         <li data-k="espace"><span class="box"></span>Passez dans l'onglet d'un autre espace quand il vous montre un losange or.</li>
         <li data-k="label"><span class="box"></span>Copiez l'adresse d'un agent en cliquant son label.</li>
+        <li data-k="raccourci"><span class="box"></span>Créez un raccourci rangé dans un cluster&nbsp;: sa carte se dessine pendant la saisie.</li>
       </ul>
       <div class="score" id="score"></div>
     </div>
@@ -895,7 +998,7 @@ function renderCatalogue() {
         <div class="entry" data-g="${gi}" data-i="${i}">
           <span class="hdl" aria-hidden="true">⠿</span>
           <span class="en"><span class="chip" style="--pc:${e.pc}"></span>${esc(e.name)}</span>
-          <span class="more" aria-hidden="true">⋯</span>
+          <button type="button" class="more" title="Modifier le raccourci" aria-label="Modifier ${esc(e.name)}">⋯</button>
           <span class="em">${esc(e.user)}@${esc(e.distro)} · ${esc(e.path)}${e.pre ? ' · ' + esc(e.pre) : ''}</span>
           <div class="modes">
             <button type="button" class="claude" data-m="claude">✦ Claude</button>
@@ -910,12 +1013,122 @@ function renderCatalogue() {
 }
 $('#btnTous').addEventListener('click', () => { tous = !tous; renderCatalogue(); });
 $('#groups').addEventListener('click', e => {
+  const m = e.target.closest('.more');
+  if (m) { const en = m.closest('.entry'); return openForm({ g: +en.dataset.g, i: +en.dataset.i }); }
   const b = e.target.closest('button[data-m]'); if (!b) return;
   const en = b.closest('.entry');
   openMode(b.dataset.m, CATALOGUE[en.dataset.g].items[en.dataset.i]);
 });
 $('#q').addEventListener('input', renderCatalogue);
-$('#btnNew').addEventListener('click', () => toast('Dans KoA, le formulaire d\'un nouveau raccourci glisse à droite : distro, utilisateur, répertoire, commande de pré-lancement.'));
+$('#btnNew').addEventListener('click', () => openForm(null));
+
+// ——— Le formulaire d'un raccourci (KoA 1.13) ———
+// Les couleurs sont celles de KoA, mates ; le « + » ouvre une couleur libre, refusée si elle est vive :
+// le vif appartient aux états (épic 07), et c'est le formulaire qui le garde désormais (épic 156).
+const PALETTE = [['Terre', '#9B6950'], ['Olive', '#959B50'], ['Mousse', '#5C9B50'], ['Jade', '#509B7C'],
+  ['Océan', '#50829B'], ['Indigo', '#56509B'], ['Prune', '#8E509B'], ['Grenat', '#9B506F']];
+let fRef = null, fColor = '';
+function oklch(hex) {
+  const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const [r, g, b] = [1, 3, 5].map(i => lin(parseInt(hex.slice(i, i + 2), 16)));
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s, B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+  return { L: 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s, C: Math.hypot(A, B) };
+}
+// Les bornes de CouleurLibre (Koa.Core) : celles de la palette livrée, mesurées en OkLCh.
+function probleme(hex) {
+  const { L, C } = oklch(hex);
+  if (C > 0.14) return 'Trop vive : elle se lirait comme un état de session.';
+  if (L < 0.45) return 'Trop sombre : elle disparaîtrait sur le thème sombre.';
+  if (L > 0.70) return 'Trop claire : elle disparaîtrait sur le thème clair.';
+  return '';
+}
+function renderCols() {
+  const libre = fColor && !PALETTE.some(([, h]) => h === fColor);
+  $('#fCols').innerHTML = `<button type="button" data-c="" aria-pressed="${!fColor}" title="Aucune">—</button>` +
+    PALETTE.map(([n, h]) => `<button type="button" data-c="${h}" aria-pressed="${fColor === h}" title="${n}"><span class="dot" style="--c:${h}"></span></button>`).join('') +
+    `<label data-on="${!!libre}" title="Une autre couleur…">${libre ? `<span class="dot" style="--c:${fColor}"></span>` : '+'}<input type="color" id="fLibre" value="${libre ? fColor : '#50829B'}" aria-label="Une autre couleur"></label>`;
+}
+function fRead() {
+  return { name: $('#fName').value.trim(), distro: $('#fDistro').value, user: $('#fUser').value.trim(), path: $('#fPath').value.trim(),
+    pre: $('#fPre').value.trim(), cl: $('#fCl').value, g: $('#fGrp').value.trim(), mode: $('#fMode').value, model: $('#fModel').value, pc: fColor };
+}
+// L'aperçu est la carte que le raccourci donnera : on la lit pendant qu'on le règle.
+function fPreview() {
+  const f = fRead();
+  const past = $('#pPast');
+  past.style.setProperty('--pc', f.pc || 'var(--stroke)');
+  past.textContent = f.name ? f.name[0].toUpperCase() : '';
+  $('#pName').textContent = f.name || 'Sans nom';
+  $('#pCl').textContent = f.cl; $('#pCl').hidden = f.cl === 'poste';
+  $('#pGr').textContent = f.g ? `· ${f.g}` : '';
+  $('#pTgt').textContent = `${f.user}@${f.distro}  ${f.path}`;
+  $('#pRes').textContent = [f.mode, f.model].filter(Boolean).join(' · ');
+  $('#fAdvRes').textContent = f.pre || 'aucune commande avant le lancement';
+}
+function openForm(ref) {
+  fRef = ref;
+  const e = ref ? CATALOGUE[ref.g].items[ref.i] : null;
+  $('#fTitle').textContent = e ? 'Modifier le raccourci' : 'Nouveau raccourci';
+  $('#fSub').textContent = e ? 'Les modifications remplacent ce raccourci du catalogue.' : 'Une distro, un utilisateur, un répertoire. « Enregistrer » l\'ajoute au catalogue.';
+  $('#fName').value = e ? e.name : ''; $('#fDistro').value = e ? e.distro : 'Debian'; $('#fUser').value = e ? e.user : 'admin';
+  $('#fPath').value = e ? e.path : ''; $('#fPre').value = e ? e.pre : ''; $('#fGrp').value = e ? CATALOGUE[ref.g].g : '';
+  $('#fCl').value = e ? (e.cl || 'poste') : esp; $('#fMode').value = ''; $('#fModel').value = '';
+  fColor = e && /^#[0-9A-F]{6}$/i.test(e.pc) ? e.pc.toUpperCase() : '';
+  // « Avancé » replié par défaut ; ouvert seul quand il porte quelque chose.
+  $('#fAdv').open = !!(e && e.pre);
+  // Lancer sans enregistrer à la création seulement : en édition, la carte porte déjà toutes les portes.
+  $('#fDel').hidden = !e; $('#fRun').hidden = !!e;
+  $('#fHint').textContent = ''; $('#fSouci').textContent = '';
+  renderCols(); fPreview();
+  $('#fdlg').hidden = false;
+  $('#fName').focus();
+}
+function closeForm() { $('#fdlg').hidden = true; fRef = null; }
+function fValide(f) {
+  const manque = [!f.name && 'nom', !f.user && 'utilisateur', !f.path && 'répertoire'].filter(Boolean);
+  $('#fHint').textContent = manque.length ? `Il manque : ${manque.join(', ')}.` : '';
+  return !manque.length;
+}
+$('#fCols').addEventListener('click', e => {
+  const b = e.target.closest('button[data-c]'); if (!b) return;
+  fColor = b.dataset.c; $('#fSouci').textContent = ''; renderCols(); fPreview();
+});
+$('#fCols').addEventListener('change', e => {
+  if (e.target.id !== 'fLibre') return;
+  const hex = e.target.value.toUpperCase(), p = probleme(hex);
+  $('#fSouci').textContent = p;
+  if (!p) { fColor = hex; renderCols(); fPreview(); }
+});
+['#fName', '#fUser', '#fPath', '#fPre', '#fGrp'].forEach(id => $(id).addEventListener('input', fPreview));
+['#fDistro', '#fCl', '#fMode', '#fModel'].forEach(id => $(id).addEventListener('change', fPreview));
+$('#fX').addEventListener('click', closeForm);
+$('#fCancel').addEventListener('click', closeForm);
+$('#fdlg').addEventListener('keydown', e => { if (e.key === 'Escape') closeForm(); });
+$('#fRun').addEventListener('click', () => { const f = fRead(); if (fValide(f)) { closeForm(); launch(f); } });
+$('#fDel').addEventListener('click', () => {
+  if (!fRef) return;
+  const [e] = CATALOGUE[fRef.g].items.splice(fRef.i, 1);
+  closeForm(); renderCatalogue();
+  toast(`Raccourci ${e.name} retiré du catalogue. Recharger la page le fait revenir.`);
+});
+$('#fSave').addEventListener('click', () => {
+  const f = fRead(); if (!fValide(f)) return;
+  const entree = fRef ? CATALOGUE[fRef.g].items[fRef.i] : { git: { b: 'main' } };
+  Object.assign(entree, { name: f.name, distro: f.distro, user: f.user, path: f.path, pre: f.pre, cl: f.cl, pc: f.pc || 'var(--stroke-hi)' });
+  if (fRef) CATALOGUE[fRef.g].items.splice(fRef.i, 1);
+  const nom = f.g || 'Sans groupe';
+  let grp = CATALOGUE.find(x => x.g.toLowerCase() === nom.toLowerCase());
+  if (!grp) CATALOGUE.push(grp = { g: nom, items: [] });
+  grp.items.push(entree);
+  // Le catalogue se rouvre sur l'espace du raccourci : on le voit là où ses sessions naîtront.
+  esp = f.cl; tous = false;
+  closeForm(); renderTabs(); renderCatalogue();
+  toast(`${f.name} est au catalogue${f.cl === 'poste' ? '' : `, dans l'espace ${f.cl}`}.`);
+  done('raccourci');
+});
 $('#btnCat').addEventListener('click', () => {
   view = view === 'catalogue' ? 'session' : 'catalogue';
   renderSidebar(); renderPane();

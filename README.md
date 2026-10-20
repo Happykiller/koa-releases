@@ -13,7 +13,7 @@
 
 **[⬇ &nbsp;Télécharger la dernière version](../../releases/latest)** &nbsp;·&nbsp; **[▶ &nbsp;Essayer dans le navigateur](https://happykiller.github.io/koa-releases/)** &nbsp;·&nbsp; **[◆ &nbsp;Le framework agentique](https://happykiller.github.io/koa-releases/architecture.html)**
 
-<img src="assets/vue-sessions.png" width="850" alt="KoA : la barre latérale à gauche — une session attend une autorisation, une travaille, une a fini — et à droite le terminal de la session ouverte, où l'agent rend son rapport" />
+<img src="assets/vue-sessions.png" width="850" alt="KoA : en haut, un onglet par cluster, celui qui attend une autorisation le dit d'un losange or ; à gauche, les sessions de l'onglet ouvert — une attend une autorisation, une travaille, deux sont au repos — et à droite le terminal de la session ouverte, où l'agent rend son rapport" />
 
 </div>
 
@@ -49,14 +49,18 @@ jamais par la couleur seule :
 <img src="assets/etats.svg" width="712" alt="Les six états : Autorisation (losange or), Erreur (triangle rouge), En cours (disque cyan), Démarrage (anneau bleu), Inactif (anneau gris), Terminé (coche verte)" />
 </div>
 
-L'or est **réservé** à la session qui vous attend : seule à pulser, toujours remontée en tête
-de la barre latérale. Une session bloquée sur une permission ne peut pas se noyer dans le flux.
+L'or est **réservé** à la session qui vous attend : seule à pulser, et lisible jusque sur l'onglet
+d'un autre espace. Une session bloquée sur une permission ne peut pas se noyer dans le flux.
 
 ## Ce que KoA sait faire
 
 - **Toutes vos sessions dans une barre latérale** — pastille d'état, activité en clair, durée,
   branche et statut git. Quatre largeurs, du rail de 64 px qui garde la supervision en vision
   périphérique à la vue large où toutes les actions sont visibles.
+- **Un espace par cluster** — un onglet par portefeuille de projets, et la barre ne montre que le sien,
+  sans jamais cacher ce qui attend ailleurs : l'onglet d'à côté porte le losange or. Chaque cluster a sa
+  **fiche** : son équipe entière, rôle par rôle, et « Ouvrir l'équipe » d'un geste. Le catalogue, la
+  Cantina et la Librairie s'ouvrent sur l'espace de l'onglet.
 - **Autoriser ou refuser sans ouvrir la session** — la demande de l'agent s'affiche sur la
   vignette, deux boutons suffisent. Et quand la fenêtre est réduite, le **dock** garde la
   session la plus urgente à portée de clic :
@@ -71,7 +75,7 @@ de la barre latérale. Une session bloquée sur une permission ne peut pas se no
   enregistrer. Et **plusieurs façons d'ouvrir chaque contexte** : avec Claude (ou Codex, ou
   Claude isolé dans un worktree git), en shell nu, dans VS Code, ou dans l'Explorateur Windows.
 
-  <img src="assets/catalogue.png" width="850" alt="Le catalogue en cartes : des raccourcis rangés en groupes repliables, colorés, iconés et décrits, chacun portant son bouton Claude scindé, puis terminal, VS Code et Explorateur" />
+  <img src="assets/catalogue.png" width="850" alt="Le catalogue en cartes, ouvert sur l'espace de l'onglet — « Tous les espaces » rend le reste du poste : des raccourcis rangés en groupes repliables, colorés, iconés et décrits, chacun portant son bouton Claude scindé, puis terminal, VS Code et Explorateur" />
 
 - **Une adresse par session** — chaque agent Claude porte son `@contexte-label`, copiable d'un
   clic : le nom sous lequel les autres sessions du poste peuvent lui parler.

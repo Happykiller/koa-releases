@@ -86,7 +86,7 @@ button { cursor: pointer; }
 .stage { position: relative; min-width: 0; }
 .win {
   --sbw: 360px;
-  display: grid; grid-template-columns: var(--sbw) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+  display: grid; grid-template-columns: var(--sbw) minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr);
   height: 680px; border: 1px solid var(--stroke); border-radius: 10px; overflow: hidden;
   background: var(--bg-canvas); box-shadow: var(--shadow);
   transition: grid-template-columns .28s cubic-bezier(.2,.7,.2,1);
@@ -102,6 +102,15 @@ button { cursor: pointer; }
 .titlebar .sp { flex: 1; }
 .titlebar button { border: 0; background: transparent; width: 40px; height: 28px; border-radius: 6px; color: var(--mid); font-size: 15px; }
 .titlebar button:hover { background: var(--bg-hover); color: var(--hi); }
+/* Les onglets d'espace (KoA 1.12) : un par cluster ; la barre ne montre que le sien, et ce qui attend se lit sur l'onglet d'à côté. */
+.tabs { grid-column: 1 / -1; display: flex; gap: 2px; padding: 3px 8px 0; background: var(--bg-app); border-bottom: 1px solid var(--stroke); overflow-x: auto; }
+.tab { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--mid); padding: 6px 12px; display: flex; gap: 8px; align-items: center; font: 600 12px/1 var(--ui); border-radius: 6px 6px 0 0; white-space: nowrap; }
+.tab:hover { background: var(--bg-hover); color: var(--hi); }
+.tab[aria-selected="true"] { color: var(--hi); border-bottom-color: var(--brand); }
+.tab .n { font: 400 11px/1 var(--mono); color: var(--lo); }
+.tab .bw { color: var(--s-wait); } .tab .be { color: var(--s-err); } .tab .br { color: var(--s-run); } .tab .bs { color: var(--s-start); }
+.cathead .tous { border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 8px; padding: 7px 12px; color: var(--mid); }
+.cathead .tous[aria-pressed="true"] { background: var(--brand); color: var(--bg-app); border-color: var(--brand); }
 
 /* Barre latérale */
 .sidebar { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--stroke); background: var(--bg-canvas); }
@@ -290,7 +299,7 @@ button { cursor: pointer; }
 .foot a { color: var(--mid); }
 
 @media (max-width: 820px) {
-  .win { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; height: auto; }
+  .win { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto; height: auto; }
   .sidebar { border-right: 0; border-bottom: 1px solid var(--stroke); max-height: 440px; }
   .pane { height: 480px; }
   .win[data-tier="rail"] .cards { flex-direction: row; flex-wrap: wrap; }
@@ -348,6 +357,7 @@ button { cursor: pointer; }
         <span class="sp"></span>
         <button type="button" id="tbMin" title="Réduire : le dock prend le relais" aria-label="Réduire la fenêtre">–</button>
       </div>
+      <div class="tabs" id="tabs" role="tablist" aria-label="Espaces"></div>
       <aside class="sidebar">
         <div class="sbhead"><h2>Sessions</h2><span id="count"></span></div>
         <div class="cards" id="cards"></div>
@@ -361,12 +371,13 @@ button { cursor: pointer; }
           <form class="tin" id="tform" autocomplete="off"><span>❯</span><input id="tinput" aria-label="Écrire à la session ouverte"></form>
           <div class="tstat" id="tstat"></div>
         </div>
-        <div class="view" id="vEmpty" hidden><div class="empty">Aucune session ouverte.<br>Ouvrez-en une depuis le catalogue.</div></div>
+        <div class="view" id="vEmpty" hidden><div class="empty">Aucune session dans cet espace.<br>Ouvrez-en une depuis le catalogue.</div></div>
         <div class="view" id="vCat" hidden>
           <div class="cat">
             <div class="cathead">
               <h2>Catalogue</h2>
               <input id="q" type="search" placeholder="⌕ Rechercher un raccourci…" aria-label="Rechercher un raccourci">
+              <button type="button" class="tous" id="btnTous" aria-pressed="false" title="Le catalogue s'ouvre sur l'espace de l'onglet : voir tout le poste">Tous les espaces</button>
               <button type="button" class="new" id="btnNew">+ Nouveau</button>
             </div>
             <div id="groups" style="display:grid;gap:18px"></div>
@@ -392,6 +403,7 @@ button { cursor: pointer; }
         <li data-k="dock"><span class="box"></span>Réduisez la fenêtre, puis répondez à une demande depuis le dock.</li>
         <li data-k="tiers"><span class="box"></span>Changez la largeur de la barre&nbsp;: elle montre plus ou moins selon la place.</li>
         <li data-k="catalogue"><span class="box"></span>Ouvrez une nouvelle session depuis le catalogue.</li>
+        <li data-k="espace"><span class="box"></span>Passez dans l'onglet d'un autre espace quand il vous montre un losange or.</li>
         <li data-k="label"><span class="box"></span>Copiez l'adresse d'un agent en cliquant son label.</li>
       </ul>
       <div class="score" id="score"></div>
@@ -402,7 +414,7 @@ button { cursor: pointer; }
     </div>
   </section>
 
-  <p class="foot">Simulation construite sur la direction artistique de KoA 0.30. Les textes anglais du terminal sont ceux qu'affiche Claude Code&nbsp;; KoA ne les traduit pas. KoA est une application Windows native (WinUI&nbsp;3) qui demande WSL2 et Claude Code&nbsp;: <a href="https://github.com/Happykiller/koa-releases">dépôt des versions</a>.</p>
+  <p class="foot">Simulation construite sur la direction artistique de KoA 1.12. Les textes anglais du terminal sont ceux qu'affiche Claude Code&nbsp;; KoA ne les traduit pas. KoA est une application Windows native (WinUI&nbsp;3) qui demande WSL2 et Claude Code&nbsp;: <a href="https://github.com/Happykiller/koa-releases">dépôt des versions</a>.</p>
 </div>
 
 <script>
@@ -413,7 +425,7 @@ const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const ETATS = {
-  waiting:  { lib: 'Autorisation', p: 1, sens: "L'agent attend votre accord. Seul état qui pulse, toujours en tête de la barre." },
+  waiting:  { lib: 'Autorisation', p: 1, sens: "L'agent attend votre accord. Seul état qui pulse, et lisible jusque sur l'onglet d'un autre espace." },
   error:    { lib: 'Erreur',       p: 2, sens: "Le tour s'est arrêté sur une erreur. Une réponse le relance." },
   running:  { lib: 'En cours',     p: 3, sens: "L'agent travaille." },
   starting: { lib: 'Démarrage',    p: 4, sens: 'La session s\'ouvre.' },
@@ -528,21 +540,21 @@ const GIT = {
 function seed() {
   const now = Date.now();
   return [
-    { id: 'fac', name: 'facturation', label: 'export', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api',
+    { id: 'fac', cl: 'produit', name: 'facturation', label: 'export', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api',
       git: GIT.fac, mode: 'défaut', state: 'running', since: now - 48e3, desc: 'Lit le modèle des avoirs', last: '',
       prompt: "Ajoute l'export PDF des avoirs, avec ses tests",
       lines: [T.prompt("Ajoute l'export PDF des avoirs, avec ses tests"),
         T.tool('Read', 'src/export/pdf.ts'), T.res('Read 214 lines'),
         T.tool('Read', 'src/models/avoir.ts'), T.res('Read 87 lines')] },
-    { id: 'site', name: 'site-vitrine', label: '', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine',
+    { id: 'site', cl: 'vitrine', name: 'site-vitrine', label: '', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine',
       git: GIT.site, mode: 'défaut', state: 'starting', since: now, desc: '', last: '', prompt: '', lines: [] },
-    { id: 'mig', name: 'migrations', label: 'v2.4', user: 'bob', distro: 'Debian', path: '~/data/migrations',
+    { id: 'mig', cl: 'produit', name: 'migrations', label: 'v2.4', user: 'bob', distro: 'Debian', path: '~/data/migrations',
       git: GIT.mig, mode: 'auto', state: 'running', since: now - 95e3, desc: 'Relit les index de la table factures', last: '',
       prompt: 'Prépare la migration 2.4 et vérifie-la à blanc sur la copie de prod',
       lines: [T.prompt('Prépare la migration 2.4 et vérifie-la à blanc sur la copie de prod'),
         T.tool('Read', 'migrations/2.4/001_factures_index.sql'), T.res('Read 42 lines'),
         T.tool('Bash', 'psql -h copie-prod -c "\\d+ factures"'), T.res('Table "public.factures" · 18 columns, 4 indexes')] },
-    { id: 'docs', name: 'docs-produit', label: '', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit',
+    { id: 'docs', cl: 'vitrine', name: 'docs-produit', label: '', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit',
       git: GIT.docs, mode: 'auto', state: 'idle', since: now - 4 * 60e3, desc: '',
       last: "J'ai réécrit le guide d'installation. La section sur les distributions multiples mérite une relecture : je n'ai pas pu vérifier les captures.",
       prompt: "Réécris le guide d'installation pour Windows 11",
@@ -551,7 +563,7 @@ function seed() {
         T.tool('Update', 'docs/installation.md'), T.res('Updated docs/installation.md with <span class="g">112 additions</span> and <span class="r">57 removals</span>'),
         T.msg("J'ai réécrit le guide d'installation. La section sur les distributions multiples mérite une relecture : je n'ai pas pu vérifier les captures."),
         T.done('2m 05s')] },
-    { id: 'veille', name: 'veille-techno', label: '', user: 'admin', distro: 'Debian', path: '~/notes/veille',
+    { id: 'veille', cl: 'poste', name: 'veille-techno', label: '', user: 'admin', distro: 'Debian', path: '~/notes/veille',
       git: GIT.veille, mode: 'plan', state: 'ended', since: now - 26 * 60e3, desc: '',
       last: 'Synthèse de la semaine rangée dans notes/veille/2026-40.md.',
       prompt: 'Résume les notes de veille de la semaine',
@@ -564,19 +576,25 @@ function seed() {
 
 const CATALOGUE = [
   { g: 'Clients', items: [
-    { name: 'facturation', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api', pre: 'nvm use 20', pc: '#C58BC0', git: GIT.fac },
-    { name: 'site-vitrine', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine', pre: '', pc: '#8FC7A8', git: GIT.site },
-    { name: 'migrations', user: 'bob', distro: 'Debian', path: '~/data/migrations', pre: 'source .env', pc: '#A6BEE6', git: GIT.mig },
+    { name: 'facturation', cl: 'produit', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api', pre: 'nvm use 20', pc: '#C58BC0', git: GIT.fac },
+    { name: 'site-vitrine', cl: 'vitrine', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine', pre: '', pc: '#8FC7A8', git: GIT.site },
+    { name: 'migrations', cl: 'produit', user: 'bob', distro: 'Debian', path: '~/data/migrations', pre: 'source .env', pc: '#A6BEE6', git: GIT.mig },
   ] },
   { g: 'Interne', items: [
-    { name: 'docs-produit', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit', pre: '', pc: '#D9A9D4', git: GIT.docs },
-    { name: 'outillage', user: 'admin', distro: 'Debian', path: '~/outils', pre: 'source .venv/bin/activate', pc: '#FFC94D', git: { b: 'main', dirty: 2 } },
-    { name: 'veille-techno', user: 'admin', distro: 'Debian', path: '~/notes/veille', pre: '', pc: '#6FD3D8', git: GIT.veille },
+    { name: 'docs-produit', cl: 'vitrine', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit', pre: '', pc: '#D9A9D4', git: GIT.docs },
+    { name: 'outillage', cl: 'poste', user: 'admin', distro: 'Debian', path: '~/outils', pre: 'source .venv/bin/activate', pc: '#FFC94D', git: { b: 'main', dirty: 2 } },
+    { name: 'veille-techno', cl: 'poste', user: 'admin', distro: 'Debian', path: '~/notes/veille', pre: '', pc: '#6FD3D8', git: GIT.veille },
   ] },
 ];
 
 // ——— État de la page ———
 let sessions = [], sel = 'fac', view = 'session', tier = 'standard', minimized = false, nid = 0;
+// Les espaces (KoA 1.12) : l'onglet ouvert, « tous les espaces » au catalogue, et la dernière session vue dans chacun.
+let esp = 'produit', tous = false;
+const derniere = {};
+const ESPACES = ['produit', 'vitrine', 'poste'];
+const NOMS = { produit: 'produit', vitrine: 'vitrine', poste: 'Poste' };
+const vis = () => sessions.filter(s => (s.cl || 'poste') === esp);
 const cards = new Map();
 const live = s => sessions.includes(s);
 const cur = () => sessions.find(s => s.id === sel);
@@ -750,10 +768,41 @@ function updCard(s) {
   }
 }
 // Une demande d'autorisation passe en tête, la plus ancienne d'abord ; le reste garde l'ordre de la barre.
+// Les vignettes de l'espace ouvert, dans l'ordre de la barre : KoA ne les déplace jamais d'elles-mêmes —
+// c'est la couleur, et l'onglet d'à côté, qui portent l'urgence.
 function order() {
-  const w = sessions.filter(s => s.state === 'waiting').sort((a, b) => a.since - b.since);
-  return [...w, ...sessions.filter(s => s.state !== 'waiting')];
+  return vis();
 }
+
+// ——— Onglets d'espace ———
+function renderTabs() {
+  const parts = (cl) => {
+    const ss = sessions.filter(s => (s.cl || 'poste') === cl);
+    const c = k => ss.filter(s => s.state === k).length;
+    const b = [['waiting', '◆', 'bw'], ['error', '▲', 'be'], ['running', '●', 'br'], ['starting', '◌', 'bs']]
+      .filter(([k]) => c(k)).map(([k, g, cls]) => `<span class="${cls}">${g} ${c(k)}</span>`).join('');
+    const mots = [c('waiting') && `${c('waiting')} autorisation${c('waiting') > 1 ? 's' : ''} attendue${c('waiting') > 1 ? 's' : ''}`,
+      c('error') && `${c('error')} en erreur`, `${ss.length} session${ss.length > 1 ? 's' : ''}`].filter(Boolean).join(', ');
+    return { b, n: ss.length, mots };
+  };
+  $('#tabs').innerHTML = ESPACES.map(cl => {
+    const p = parts(cl);
+    return `<button type="button" class="tab" role="tab" data-esp="${cl}" aria-selected="${cl === esp}" title="${esc(NOMS[cl])} — ${esc(p.mots)}">` +
+      `<span>${esc(NOMS[cl])}</span>${p.b}<span class="n">${p.n}</span></button>`;
+  }).join('');
+}
+function ouvrirEspace(cl, id) {
+  if (cl !== esp) { esp = cl; tous = false; done('espace'); }
+  const ss = vis();
+  const cible = id || (ss.some(s => s.id === derniere[esp]) ? derniere[esp] : ss[0] && ss[0].id);
+  if (cible) { sel = cible; view = 'session'; }
+  else { view = 'catalogue'; renderCatalogue(); }
+  renderSidebar(); renderPane();
+}
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-esp]'); if (!b) return;
+  if (b.dataset.esp !== esp) ouvrirEspace(b.dataset.esp);
+});
 function urgent() {
   return [...sessions].sort((a, b) => ETATS[a.state].p - ETATS[b.state].p || a.since - b.since)[0];
 }
@@ -762,7 +811,7 @@ function renderSidebar() {
   const ord = order();
   const before = new Map();
   if (!reduce) for (const [id, el] of cards) if (el.isConnected) before.set(id, el.getBoundingClientRect().top);
-  for (const [id, el] of cards) if (!sessions.some(s => s.id === id)) { el.remove(); cards.delete(id); }
+  for (const [id, el] of cards) if (!ord.some(s => s.id === id)) { el.remove(); cards.delete(id); }
   ord.forEach(updCard);
   const now = [...list.children].map(e => e.dataset.id).join();
   if (now !== ord.map(s => s.id).join()) {
@@ -774,13 +823,17 @@ function renderSidebar() {
       if (Math.abs(dy) > 1) el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.2,.7,.2,1)' });
     }
   }
-  $('#count').textContent = `${sessions.length} session${sessions.length > 1 ? 's' : ''}`;
+  $('#count').textContent = `${ord.length} session${ord.length > 1 ? 's' : ''}`;
   $('#btnCat').setAttribute('aria-pressed', String(view === 'catalogue'));
+  renderTabs();
 }
 
 // ——— Panneau ———
 function select(id) {
-  sel = id; view = 'session';
+  // Une alerte, le dock : la session peut vivre dans un autre espace — on y passe, sur ce geste-là seulement.
+  const s = sessions.find(x => x.id === id);
+  if (s && (s.cl || 'poste') !== esp) { esp = s.cl || 'poste'; tous = false; }
+  sel = id; view = 'session'; derniere[esp] = id;
   if (minimized) setMin(false);
   renderSidebar(); renderPane();
 }
@@ -829,8 +882,12 @@ function renderCatalogue() {
   const q = $('#q').value.trim().toLowerCase();
   const host = $('#groups');
   let html = '', n = 0;
+  $('#btnTous').setAttribute('aria-pressed', String(tous));
   CATALOGUE.forEach((grp, gi) => {
-    const items = grp.items.map((e, i) => ({ e, i })).filter(({ e }) => !q || `${e.name} ${e.user}@${e.distro} ${e.path}`.toLowerCase().includes(q));
+    // Le catalogue s'ouvre sur l'espace de l'onglet ; « Tous les espaces » rend le poste entier.
+    const items = grp.items.map((e, i) => ({ e, i }))
+      .filter(({ e }) => tous || (e.cl || 'poste') === esp)
+      .filter(({ e }) => !q || `${e.name} ${e.user}@${e.distro} ${e.path}`.toLowerCase().includes(q));
     if (!items.length) return;
     n += items.length;
     html += `<div class="grp"><h3>${esc(grp.g)} <span>${items.length}</span></h3><div class="entries">` +
@@ -848,8 +905,10 @@ function renderCatalogue() {
           </div>
         </div>`).join('') + `</div></div>`;
   });
-  host.innerHTML = n ? html : `<p class="nores">Aucun raccourci ne correspond à « ${esc(q)} ».</p>`;
+  host.innerHTML = n ? html : q ? `<p class="nores">Aucun raccourci ne correspond à « ${esc(q)} ».</p>`
+    : `<p class="nores">Rien dans ${esc(NOMS[esp])} : « Tous les espaces » montre le reste du poste.</p>`;
 }
+$('#btnTous').addEventListener('click', () => { tous = !tous; renderCatalogue(); });
 $('#groups').addEventListener('click', e => {
   const b = e.target.closest('button[data-m]'); if (!b) return;
   const en = b.closest('.entry');
@@ -876,12 +935,13 @@ function launch(ctx) {
   const d = new Date();
   const s = {
     id: 'n' + (++nid), name: ctx.name, label: `${d.getHours()}h${String(d.getMinutes()).padStart(2, '0')}`,
-    user: ctx.user, distro: ctx.distro, path: ctx.path, git: ctx.git || { b: 'main' }, mode: 'défaut',
+    user: ctx.user, distro: ctx.distro, path: ctx.path, git: ctx.git || { b: 'main' }, mode: 'défaut', cl: ctx.cl,
     state: 'starting', since: Date.now(), desc: '', last: '', prompt: '', lines: [],
   };
-  // Les nouvelles sessions arrivent en haut de la barre.
+  // Les nouvelles sessions arrivent en haut de la barre, dans l'espace de leur distro.
   sessions.unshift(s);
-  sel = s.id; view = 'session';
+  esp = ctx.cl || 'poste'; tous = false;
+  sel = s.id; view = 'session'; derniere[esp] = s.id;
   if (minimized) setMin(false);
   renderSidebar(); renderPane(); renderDock();
   done('catalogue');
@@ -972,7 +1032,8 @@ function start() {
   for (const el of cards.values()) el.remove();
   cards.clear();
   sessions = seed();
-  sel = 'fac'; view = 'session';
+  sel = 'fac'; view = 'session'; esp = 'produit'; tous = false;
+  for (const k of Object.keys(derniere)) delete derniere[k];
   $('#toasts').innerHTML = '';
   $('#q').value = '';
   renderSidebar(); renderPane(); renderDock();

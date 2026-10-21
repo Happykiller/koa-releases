@@ -100,6 +100,9 @@ d'un autre espace. Une session bloquée sur une permission ne peut pas se noyer 
   <img src="assets/accueil.png" width="850" alt="La page d'accueil de KoA : le bandeau de reprise propose de rouvrir les quatre sessions ouvertes à la dernière fermeture" />
 - **Multi-utilisateurs, multi-distros** — chaque session tourne sous l'utilisateur et la
   distribution WSL de son projet, sans se marcher dessus.
+- **Chaque front à son adresse** — `http://5173.debian.localhost/` ouvre le serveur de dev
+  d'une distro, sans DNS ni droits d'administrateur. Une distro au réseau isolé a ses ports à
+  elle : deux distros servent chacune leur port 80, ouvertes côte à côte.
 
 ## Sous le capot
 

@@ -40,6 +40,18 @@ instanciée par frontière de confiance**, et cloisonnée par les accès plutôt
 Vos agents le lisent dans la librairie (`koa/architecture`) ; vous, en schémas sur
 **[sa page dédiée](https://happykiller.github.io/koa-releases/architecture.html)**.
 
+Vos agents et vos clusters s'appuient sur des éléments que KoA tient pour eux, sans qu'aucun projet
+ne les porte :
+
+- **la librairie** — les profils de l'équipe (PO, lead tech, QA, DevOps, SecOps, orchestrateur), leurs
+  contrats et la méthode de chantier, lus par vos agents au lieu d'être recopiés ;
+- **les skills** — la marketplace [`koa-skills`](https://github.com/Happykiller/koa-skills), épinglée par
+  version : les gestes de chaque rôle, et ceux de l'orchestrateur, du tour de table à la livraison ;
+- **le coffre de chaque cluster** — `kubeconfig`, comptes, clés, jetons : ce qu'aucun dépôt ne doit tracker,
+  chiffré sur le poste, qu'un agent dépose dans sa distro sans en voir la valeur ;
+- **la Cantina et son audit** — les tables où une équipe se parle, cluster par cluster, et la rétrospective
+  de ce qui s'y est dit et fait.
+
 ## Le langage d'état
 
 Toute l'identité de KoA tient dans six états, lisibles par **couleur + forme + libellé** —
@@ -61,6 +73,18 @@ d'un autre espace. Une session bloquée sur une permission ne peut pas se noyer 
   sans jamais cacher ce qui attend ailleurs : l'onglet d'à côté porte le losange or. Chaque cluster a sa
   **fiche** : son équipe entière, rôle par rôle, et « Ouvrir l'équipe » d'un geste. Le catalogue, la
   Cantina et la Librairie s'ouvrent sur l'espace de l'onglet.
+- **Une équipe qui travaille par chantier** — l'orchestrateur fait le tour de la table avant de rien
+  déléguer, vous soumet un plan en vagues une seule fois, puis délègue par fiches ; la recette et la
+  sécurité interviennent quand une feature se finalise et quand vous livrez.
+- **Auditer une table** — « Auditer… » sur une table de la Cantina, puis « Arrêter l'audit… » : KoA écrit
+  la rétrospective — ce qui s'est dit, ce que chaque agent a fait outil par outil, et les constats mesurés :
+
+  <img src="assets/cantina.png" width="850" alt="La Cantina : la table d'un chantier, son mode de portage, les boutons Exporter et Auditer, et le compte rendu de l'orchestrateur — livré en 0.1.0, ce qui a été fait, ce qui ne l'a pas été, et ce qui n'a pas pu être vérifié" />
+
+- **Un coffre par cluster** — des éléments à champs libres, gérés depuis la carte du cluster : révéler,
+  copier, historique, corbeille, journal des accès. Les agents y déposent et y publient, les seeds y puisent :
+
+  <img src="assets/coffre.png" width="850" alt="Le coffre d'un cluster : une note des environnements, un jeton et le compte d'une base de recette, chacun avec sa description pour les agents ; les valeurs secrètes masquées, à révéler ou copier à la demande" />
 - **Autoriser ou refuser sans ouvrir la session** — la demande de l'agent s'affiche sur la
   vignette, deux boutons suffisent. Et quand la fenêtre est réduite, le **dock** garde la
   session la plus urgente à portée de clic :

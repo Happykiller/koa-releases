@@ -361,6 +361,39 @@ button { cursor: pointer; }
   .win { transition: none; }
   .toast { animation: none; }
 }
+
+/* La Cantina et le coffre (KoA 1.20, 1.21) : deux pages du panneau, ouvertes depuis la barre de titre. */
+.titlebar .tbn { width: auto; padding: 0 10px; font-size: 12px; }
+.titlebar .tbn[aria-pressed="true"] { background: var(--bg-hover); color: var(--hi); }
+.pg { flex: 1; min-height: 0; overflow-y: auto; background: var(--bg-canvas); padding: 16px 20px 22px; display: grid; align-content: start; gap: 12px; }
+.pghead { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.pghead h2 { margin: 0 auto 0 0; font: 600 18px/24px var(--ui); }
+.pghead .sub { width: 100%; color: var(--mid); font-size: 12.5px; }
+.pghead .audit { color: var(--gold); }
+.btn { border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 8px; padding: 6px 12px; }
+.btn:hover { background: var(--bg-hover); }
+.btn.or { background: var(--gold); color: var(--on-gold); border-color: var(--gold); font-weight: 600; }
+.fil { display: grid; gap: 8px; }
+.msg2 { border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 9px; padding: 8px 10px; display: grid; gap: 4px; animation: tin .25s ease-out; min-width: 0; }
+.msg2 .h { font-size: 11.5px; color: var(--mid); }
+.msg2 .h b { color: var(--hi); font-family: var(--mono); font-weight: 600; }
+.msg2 .t { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg2 .t .k { color: var(--gold); font-weight: 600; }
+.msg2.hum { border-color: var(--gold-line); background: var(--gold-soft); }
+.msg2 .acts { display: flex; gap: 8px; margin-top: 4px; }
+.retro { border: 1px solid var(--gold-line); background: var(--gold-soft); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; animation: tin .25s ease-out; }
+.retro h3 { margin: 0; font: 600 14px/20px var(--ui); }
+.retro ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 12.5px; color: var(--mid); }
+.retro b { color: var(--hi); }
+.retro .f { font-family: var(--mono); font-size: 11.5px; color: var(--lo); }
+.items { display: grid; gap: 8px; }
+.item { border: 1px solid var(--stroke); background: var(--bg-panel); border-radius: 9px; padding: 10px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; }
+.item .id { font-family: var(--mono); font-weight: 600; }
+.item .ds { color: var(--mid); font-size: 12.5px; }
+.item .v { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: var(--mid); overflow-wrap: anywhere; }
+.item .acts { grid-row: 1 / span 2; grid-column: 2; display: flex; gap: 6px; }
+.journal { font-family: var(--mono); font-size: 11.5px; color: var(--lo); display: grid; gap: 2px; }
+.pg h3 { margin: 6px 0 0; font: 600 13px/18px var(--ui); }
 </style>
 </head>
 <body>
@@ -398,6 +431,8 @@ button { cursor: pointer; }
         <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect x="20" y="44" width="15" height="34" rx="3"/><rect x="42.5" y="22" width="15" height="56" rx="3"/><rect x="65" y="36" width="15" height="42" rx="3"/><rect class="cap" x="42.5" y="5" width="15" height="13" rx="2.5"/></svg>
         <span class="tt">KoA</span><span class="ts">Kingdom of Agents</span>
         <span class="sp"></span>
+        <button type="button" class="tbn" id="tbCantina" aria-pressed="false" title="La Cantina : les tables où vos agents se parlent">Cantina</button>
+        <button type="button" class="tbn" id="tbCoffre" aria-pressed="false" title="Le coffre du cluster de l'espace ouvert">Coffre</button>
         <button type="button" id="tbMin" title="Réduire : le dock prend le relais" aria-label="Réduire la fenêtre">–</button>
       </div>
       <div class="tabs" id="tabs" role="tablist" aria-label="Espaces"></div>
@@ -424,6 +459,29 @@ button { cursor: pointer; }
               <button type="button" class="new" id="btnNew">+ Nouveau</button>
             </div>
             <div id="groups" style="display:grid;gap:18px"></div>
+          </div>
+        </div>
+        <div class="view" id="vCantina" hidden>
+          <div class="pg">
+            <div class="pghead">
+              <h2>Table chantier-carnet</h2>
+              <button type="button" class="btn" id="btnAudit">Auditer…</button>
+              <div class="sub" id="cPres">Assis : @carnet-orchestrateur, @carnet-po, @carnet-tech, @carnet-qa.</div>
+              <div class="sub audit" id="cAudit" hidden></div>
+            </div>
+            <div class="retro" id="retro" hidden></div>
+            <div class="fil" id="fil" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="view" id="vCoffre" hidden>
+          <div class="pg">
+            <div class="pghead">
+              <h2>Coffre du cluster produit</h2>
+              <div class="sub">Ce qu'aucun dépôt ne doit tracker. Les agents du cluster le déposent dans leur distro sans en voir la valeur ; ils publient ce qu'ils créent ; une seed y puise en naissant.</div>
+            </div>
+            <div class="items" id="items"></div>
+            <h3>Journal</h3>
+            <div class="journal" id="journal"></div>
           </div>
         </div>
       </main>
@@ -508,6 +566,9 @@ button { cursor: pointer; }
         <li data-k="espace"><span class="box"></span>Passez dans l'onglet d'un autre espace quand il vous montre un losange or.</li>
         <li data-k="label"><span class="box"></span>Copiez l'adresse d'un agent en cliquant son label.</li>
         <li data-k="raccourci"><span class="box"></span>Créez un raccourci rangé dans un cluster&nbsp;: sa carte se dessine pendant la saisie.</li>
+        <li data-k="plan"><span class="box"></span>Validez le plan que l'orchestrateur vous soumet à la Cantina&nbsp;: rien ne part avant.</li>
+        <li data-k="audit"><span class="box"></span>Auditez la table du chantier, puis arrêtez l'audit et lisez sa rétrospective.</li>
+        <li data-k="coffre"><span class="box"></span>Ouvrez le coffre du cluster et révélez un secret&nbsp;: c'est noté au journal.</li>
       </ul>
       <div class="score" id="score"></div>
     </div>
@@ -517,7 +578,7 @@ button { cursor: pointer; }
     </div>
   </section>
 
-  <p class="foot">Simulation construite sur la direction artistique de KoA 1.12. Les textes anglais du terminal sont ceux qu'affiche Claude Code&nbsp;; KoA ne les traduit pas. KoA est une application Windows native (WinUI&nbsp;3) qui demande WSL2 et Claude Code&nbsp;: <a href="https://github.com/Happykiller/koa-releases">dépôt des versions</a>.</p>
+  <p class="foot">Simulation construite sur la direction artistique de KoA 1.21. Les textes anglais du terminal sont ceux qu'affiche Claude Code&nbsp;; KoA ne les traduit pas. KoA est une application Windows native (WinUI&nbsp;3) qui demande WSL2 et Claude Code&nbsp;: <a href="https://github.com/Happykiller/koa-releases">dépôt des versions</a>.</p>
 </div>
 
 <script>
@@ -943,8 +1004,14 @@ function select(id) {
 function renderPane() {
   const s = cur();
   $('#vCat').hidden = view !== 'catalogue';
+  $('#vCantina').hidden = view !== 'cantina';
+  $('#vCoffre').hidden = view !== 'coffre';
+  $('#tbCantina').setAttribute('aria-pressed', String(view === 'cantina'));
+  $('#tbCoffre').setAttribute('aria-pressed', String(view === 'coffre'));
   $('#vSession').hidden = view !== 'session' || !s;
   $('#vEmpty').hidden = view !== 'session' || !!s;
+  if (view === 'cantina') renderFil();
+  if (view === 'coffre') renderCoffre();
   if (view !== 'session' || !s) return;
   paneHead();
   const t = $('#term');
@@ -1225,6 +1292,165 @@ function done(k) {
   $('#score').textContent = n === t ? 'Tout y est. Le vrai KoA fait la même chose avec vos propres sessions.' : `${n} sur ${t}`;
 }
 
+// ——— La Cantina : un chantier qui consulte, planifie, finalise et livre (KoA 1.21) ———
+const OR = 'carnet-orchestrateur', TE = 'carnet-tech', QA = 'carnet-qa', PO = 'carnet-po';
+const FIL = [
+  { de: OR, t: `Orchestrateur de l'équipe : je planifie, délègue par fiches, vérifie et fusionne.` },
+  { de: OR, a: `@${PO} @${TE} @${QA}`, t: `CONSULTATION carnet — un carnet de notes en ligne de commande, deux features
+Lis d'abord : QG @3f2a91c… : docs/chantiers/carnet/demande.md
+Rends un AVIS : découpage, dépendances, risques, choix à trancher` },
+  { de: TE, a: '@' + OR, t: `AVIS carnet — tech
+Découpage : stockage (JSON), puis la commande qui s'en sert
+Dépend de : l'API du stockage figée avant la commande
+Risques : un fichier illisible pris pour un carnet vide
+À trancher : des identifiants entiers, jamais réutilisés (recommandé)` },
+  { de: QA, a: '@' + OR, t: `AVIS carnet — qa
+Découpage : la recette de la commande en shell réel, un refus par cas nominal
+Risques : des codes de sortie que personne ne teste` },
+  { de: PO, a: '@' + OR, t: `AVIS carnet — po
+Découpage : deux features, chacune son « Fini quand »
+À trancher : chercher sans résultat → sortie vide, code 0` },
+  { de: OR, a: '@humain', plan: true, t: `PLAN carnet — à valider
+QG : docs/chantiers/carnet/plan.md (Gantt, heures réelles)
+Vague 1 : M1 stockage → finalisation · Vague 2 : M2 commande → finalisation · M3 : version 0.1.0
+Sans SecOps à la table : la livraison ne sera pas revue en sécurité. Livrer quand même ? Recommandé : oui, outil interne.` },
+  { de: 'humain', a: '@' + OR, t: `Validé, avec ta recommandation.` },
+  { de: OR, a: `@${TE} @${QA}`, t: `MISSION M1 — le module de stockage et ses tests
+Pour : @${TE}
+Fiche : QG @9f1afa7… : docs/chantiers/carnet/missions/M1.md`, j: `@${TE} · déposé · jeton-forge (sans voir la valeur)` },
+  { de: TE, a: `@${OR} @${QA}`, t: `RÉSULTAT M1 — fait
+Livré : feature/stockage @8f1a371cac6e…
+Fini :
+- [x] rouge puis vert — test_fichier_illisible, échec sur la base
+- [x] tests touchés — pytest tests/test_stockage.py → 21 réussis, 0 échoué
+Pas vérifié : rien` },
+  { de: QA, a: '@' + OR, t: `REVUE M1 — ACCEPTÉ, sur 8f1a371cac6e…
+BLOQUANT : aucun · SUIVI : un message d'erreur à reformuler` },
+  { de: OR, a: '@' + TE, t: `FINALISATION stockage — 8f1a371cac6e…
+Suite complète sur la tête, à jour de develop` },
+  { de: TE, a: '@' + OR, t: `REVUE stockage — ACCEPTÉ
+Suite complète : 21 réussis, 0 échoué, 0 ignoré` },
+  { de: OR, a: `@${TE} @${PO}`, t: `MISSION M2 — la commande carnet (ajouter, lister, supprimer, chercher)
+Pour : @${TE}
+Fiche : QG @0e8aedd… : docs/chantiers/carnet/missions/M2.md` },
+  { de: TE, a: `@${OR} @${PO}`, t: `RÉSULTAT M2 — fait
+Livré : feature/commande @c2e0b9e25be8…
+Fini :
+- [x] tests touchés — pytest tests/test_cli.py → 40 réussis, 0 échoué
+Pas vérifié : Windows` },
+  { de: OR, a: `@${QA} @${TE}`, t: `FINALISATION commande — c2e0b9e25be8…
+Un parcours change : recette en shell réel, et la suite complète` },
+  { de: QA, a: '@' + OR, t: `REVUE commande — ACCEPTÉ, sur c2e0b9e25be8…
+Recette : 49 cas, 0 KO · suite complète : 61 réussis` },
+  { de: OR, a: `@${TE}`, t: `LIVRAISON 0.1.0 — develop sur main, étiquette 0.1.0
+Version montée sur release/0.1.0, fusionnée sans squash` },
+  { de: OR, t: `COMPTE RENDU carnet — livré en 0.1.0
+Réalisé : stockage et commande, finalisées puis livrées · 61 tests sur main
+Pas vérifié : la sécurité — aucun SecOps à la table, risque accepté par l'humain` },
+];
+let posted = [], planValide = false, planDemande = false, audit = null, revele = new Set();
+const JOURNAL = [];
+const hm = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+// Le premier mot d'un message, en or : c'est lui qui dit ce qu'il est (livre equipe/table).
+const corps = t => esc(t).replace(/^([A-ZÉÈ]+(?: RENDU)?)/, '<span class="k">$1</span>');
+
+function renderFil() {
+  $('#fil').innerHTML = posted.map((m, i) => `
+    <div class="msg2${m.de === 'humain' ? ' hum' : ''}">
+      <div class="h"><b>@${esc(m.de)}</b>${m.a ? ` → ${esc(m.a)}` : ' · consigné à la table'} · ${esc(m.h)}</div>
+      <div class="t">${corps(m.t)}</div>
+      ${m.plan && !planValide ? `<div class="acts"><button type="button" class="btn or" data-plan="${i}">Valider le plan</button></div>` : ''}
+    </div>`).join('');
+  const f = $('#fil'); f.lastElementChild?.scrollIntoView({ block: 'nearest' });
+  $('#cAudit').hidden = !audit;
+  if (audit) $('#cAudit').textContent = `Audit en cours depuis ${audit.h} — 4 sessions notées. Tout ce qui se dit ici et tout ce que font ces agents ira dans la rétrospective.`;
+  const b = $('#btnAudit');
+  b.textContent = audit ? "Arrêter l'audit…" : 'Auditer…';
+  b.classList.toggle('or', !!audit);
+}
+function poster(m) {
+  posted.push({ ...m, h: hm() });
+  if (m.j) JOURNAL.unshift(`${hm()} · ${m.j}`);
+  if (view === 'cantina') renderFil();
+  if (view === 'coffre') renderCoffre();
+}
+async function chantier() {
+  try {
+    await sleep(2500);
+    for (const m of FIL) {
+      if (m.de === 'humain' && !planValide) {
+        if (!planDemande) { planDemande = true; if (view !== 'cantina') toast("L'orchestrateur vous soumet son plan, à la Cantina : rien ne part avant votre validation."); }
+        while (!planValide) await sleep(400);
+      }
+      poster(m);
+      await sleep(m.de === 'humain' ? 1200 : 2600);
+    }
+  } catch (e) { if (e !== STOP) throw e; }
+}
+$('#fil').addEventListener('click', e => {
+  if (!e.target.closest('[data-plan]')) return;
+  planValide = true; done('plan'); renderFil();
+});
+
+function retrospective() {
+  const vus = posted.slice(audit.depuis), premier = w => vus.findIndex(m => m.t.startsWith(w));
+  const consult = premier('CONSULTATION'), mission = premier('MISSION');
+  const missions = new Set(vus.filter(m => m.t.startsWith('MISSION')).map(m => m.t.split(' ')[1])).size;
+  const formes = ['CONSULTATION', 'AVIS', 'PLAN', 'MISSION', 'RÉSULTAT', 'REVUE', 'FINALISATION', 'LIVRAISON', 'COMPTE RENDU'];
+  const agents = vus.filter(m => m.de !== 'humain' && m.a);
+  const auFormat = agents.filter(m => formes.some(f => m.t.startsWith(f))).length;
+  // Comme KoA : le fil d'avant l'audit départage un tour de table tenu avant lui d'un tour de table absent.
+  const avant = posted.slice(0, audit.depuis).some(m => m.t.startsWith('CONSULTATION'));
+  const tour = mission < 0 ? 'aucune mission pendant l’audit, rien à juger'
+    : consult >= 0 && consult < mission ? 'tenu — une CONSULTATION avant la première mission'
+    : avant ? 'tenu avant l’audit — la CONSULTATION précède son début' : '<b>absent</b> — une mission est partie sans tour de table';
+  return `<h3>Rétrospective de la table chantier-carnet</h3>
+    <ul>
+      <li><b>Tour de table</b> : ${tour}.</li>
+      <li><b>Missions</b> : ${missions}, chacune avec sa fiche au QG.</li>
+      <li><b>Au format</b> : ${agents.length ? Math.round(100 * auFormat / agents.length) + ' %' : 'rien à juger'} de ce que les agents se sont adressé.</li>
+      <li><b>Secrets</b> : aucun message n'a la forme d'un secret collé.</li>
+      <li><b>Ce qui a été fait</b> : relu dans le transcript de chaque agent, outil par outil.</li>
+    </ul>
+    <div class="f">audits/audit-chantier-carnet-…/ · retrospective.md · chronologie.md · table.md · transcripts/</div>`;
+}
+$('#btnAudit').addEventListener('click', () => {
+  if (!audit) { audit = { h: hm(), depuis: posted.length }; $('#retro').hidden = true; toast("Audit commencé : KoA note tout ce qui se dit à cette table et retient chaque agent qui s'y assied."); }
+  else { $('#retro').innerHTML = retrospective(); $('#retro').hidden = false; audit = null; done('audit'); }
+  renderFil();
+});
+
+// ——— Le coffre du cluster (KoA 1.20) ———
+const COFFRE = [
+  { id: 'kube-recette', ds: 'kubeconfig du cluster de recette', champs: [['kubeconfig', 'apiVersion: v1 · clusters: recette · users: deployeur']] },
+  { id: 'pg-recette', ds: 'compte de la base de recette', champs: [['hôte', 'pg.recette.interne', false], ['utilisateur', 'carnet'], ['mot de passe', 'Rt7-kq2·vZ9m']] },
+  { id: 'jeton-forge', ds: 'jeton de lecture de la forge, pour les agents', champs: [['jeton', 'forge_r0_8c41…e2a7']] },
+];
+function renderCoffre() {
+  $('#items').innerHTML = COFFRE.map(it => `
+    <div class="item">
+      <span class="id">${esc(it.id)}</span>
+      <span class="ds">${esc(it.ds)}</span>
+      <div class="acts"><button type="button" class="btn" data-rev="${it.id}">${revele.has(it.id) ? 'Masquer' : 'Révéler'}</button></div>
+      <div class="v">${it.champs.map(([n, v, sec]) => `${esc(n)} : ${sec === false || revele.has(it.id) ? esc(v) : '••••••••'}`).join(' · ')}</div>
+    </div>`).join('');
+  $('#journal').innerHTML = JOURNAL.length ? JOURNAL.map(l => `<span>${esc(l)}</span>`).join('') : '<span>Rien encore.</span>';
+}
+$('#items').addEventListener('click', e => {
+  const b = e.target.closest('[data-rev]'); if (!b) return;
+  const id = b.dataset.rev;
+  if (revele.has(id)) revele.delete(id);
+  else { revele.add(id); JOURNAL.unshift(`${hm()} · vous · révélé · ${id}`); done('coffre'); }
+  renderCoffre();
+});
+
+function basculer(v) {
+  view = view === v ? 'session' : v;
+  renderSidebar(); renderPane();
+}
+$('#tbCantina').addEventListener('click', () => basculer('cantina'));
+$('#tbCoffre').addEventListener('click', () => basculer('coffre'));
+
 // ——— Largeurs ———
 $('#tiers').addEventListener('click', e => {
   const b = e.target.closest('button[data-tier]'); if (!b) return;
@@ -1246,6 +1472,8 @@ function start() {
   cards.clear();
   sessions = seed();
   sel = 'fac'; view = 'session'; esp = 'produit'; tous = false;
+  posted = []; planValide = false; planDemande = false; audit = null; revele = new Set(); JOURNAL.length = 0;
+  $('#retro').hidden = true;
   for (const k of Object.keys(derniere)) delete derniere[k];
   $('#toasts').innerHTML = '';
   $('#q').value = '';
@@ -1254,6 +1482,7 @@ function start() {
   site.lines.push(T.banner(site));
   if (sel === 'site') renderPane();
   for (const s of sessions) if (SCRIPTS[s.id]) run(s, SCRIPTS[s.id](s));
+  chantier();
 }
 $('#btnReplay').addEventListener('click', start);
 

@@ -270,7 +270,7 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
   <h2>Une plateforme commune, des clusters étanches</h2>
   <figure>
     <div class="scroll">
-    <svg viewBox="0 0 1000 600" role="img" aria-label="La librairie et la marketplace sont définies une fois ; chaque cluster lit les livres et installe les plugins épinglés ; rien ne circule d'un cluster à l'autre ; les agents proposent des chapitres qui remontent à la librairie après acceptation.">
+    <svg viewBox="0 0 1230 600" role="img" aria-label="La librairie et la marketplace sont définies une fois ; chaque cluster lit les livres et installe les plugins épinglés ; rien ne circule d'un cluster à l'autre ; les agents proposent des chapitres qui remontent à la librairie après acceptation. À droite, KoA tient sur le poste un coffre par cluster pour les secrets et ce qu'aucun repo ne tracke, la Cantina où chaque cluster a ses tables, et l'audit qui en écrit la rétrospective.">
       <defs>
         <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker>
         <marker id="arG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--gold)"/></marker>
@@ -327,7 +327,7 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
         <!-- Cluster A -->
         <rect x="40" y="240" width="225" height="320" rx="10" fill="var(--panel)" stroke="currentColor" stroke-width="2.2"/>
         <text x="56" y="264" font-size="15" font-weight="700" fill="currentColor">Cluster A</text>
-        <text x="56" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · secrets</text>
+        <text x="56" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · son coffre</text>
         <g font-size="10.5" font-weight="700" text-anchor="middle" font-family="var(--mono)">
           <circle cx="66" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="66" y="316" fill="currentColor">PO</text>
           <circle cx="100" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="100" y="316" fill="currentColor">TL</text>
@@ -355,7 +355,7 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
         <!-- Cluster B -->
         <rect x="285" y="240" width="225" height="320" rx="10" fill="var(--panel)" stroke="currentColor" stroke-width="2.2"/>
         <text x="301" y="264" font-size="15" font-weight="700" fill="currentColor">Cluster B</text>
-        <text x="301" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · secrets</text>
+        <text x="301" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · son coffre</text>
         <g font-size="10.5" font-weight="700" text-anchor="middle" font-family="var(--mono)">
           <circle cx="311" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="311" y="316" fill="currentColor">PO</text>
           <circle cx="345" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="345" y="316" fill="currentColor">TL</text>
@@ -380,7 +380,7 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
         <!-- Cluster C -->
         <rect x="530" y="240" width="225" height="320" rx="10" fill="var(--panel)" stroke="currentColor" stroke-width="2.2"/>
         <text x="546" y="264" font-size="15" font-weight="700" fill="currentColor">Cluster C</text>
-        <text x="546" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · secrets</text>
+        <text x="546" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · son coffre</text>
         <g font-size="10.5" font-weight="700" text-anchor="middle" font-family="var(--mono)">
           <circle cx="556" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="556" y="316" fill="currentColor">PO</text>
           <circle cx="590" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="590" y="316" fill="currentColor">TL</text>
@@ -405,7 +405,7 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
         <!-- Petits SaaS -->
         <rect x="775" y="240" width="205" height="320" rx="10" fill="var(--panel)" stroke="currentColor" stroke-width="2.2"/>
         <text x="791" y="264" font-size="15" font-weight="700" fill="currentColor">Petits SaaS</text>
-        <text x="791" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · secrets</text>
+        <text x="791" y="282" font-size="11" font-family="var(--mono)" fill="currentColor" opacity=".65">distro par agent · son coffre</text>
         <g font-size="10.5" font-weight="700" text-anchor="middle" font-family="var(--mono)">
           <circle cx="811" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="811" y="316" fill="currentColor">PO</text>
           <circle cx="845" cy="312" r="14" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="845" y="316" fill="currentColor">TL</text>
@@ -428,16 +428,64 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
         <text x="791" y="532" font-size="11.5" fill="currentColor" opacity=".75">un contexte par SaaS</text>
       </g>
 
+
+      <!-- KoA sur le poste : ce sur quoi les clusters s'appuient sans le porter -->
+      <rect x="1000" y="14" width="215" height="546" rx="12" fill="var(--gold-soft)" stroke="var(--gold)" stroke-dasharray="5 4"/>
+      <text x="1014" y="36" font-size="11.5" font-weight="700" fill="var(--gold)" letter-spacing="1.2">KOA · SUR LE POSTE</text>
+
+      <rect x="1012" y="48" width="191" height="262" rx="10" fill="var(--elev)" stroke="currentColor"/>
+      <text x="1026" y="70" font-size="14" font-weight="700" fill="currentColor">Coffre · le SECRET</text>
+      <text x="1026" y="87" font-size="11" fill="currentColor" opacity=".7">un par cluster, chiffré,</text>
+      <text x="1026" y="101" font-size="11" fill="currentColor" opacity=".7">hors de tout repo</text>
+      <g font-family="var(--mono)" font-size="10.5" fill="currentColor">
+        <g><rect x="1024" y="112" width="167" height="24" rx="6" fill="var(--panel)" stroke="var(--stroke)"/>
+          <rect x="1031" y="122" width="9" height="8" rx="1.5" fill="none" stroke="var(--gold)"/><path d="M1032.5 122 v-2.5 a3 3 0 0 1 6 0 v2.5" fill="none" stroke="var(--gold)"/>
+          <text x="1048" y="128">cluster A</text></g>
+        <g><rect x="1024" y="142" width="167" height="24" rx="6" fill="var(--panel)" stroke="var(--stroke)"/>
+          <rect x="1031" y="152" width="9" height="8" rx="1.5" fill="none" stroke="var(--gold)"/><path d="M1032.5 152 v-2.5 a3 3 0 0 1 6 0 v2.5" fill="none" stroke="var(--gold)"/>
+          <text x="1048" y="158">cluster B</text></g>
+        <g><rect x="1024" y="172" width="167" height="24" rx="6" fill="var(--panel)" stroke="var(--stroke)"/>
+          <rect x="1031" y="182" width="9" height="8" rx="1.5" fill="none" stroke="var(--gold)"/><path d="M1032.5 182 v-2.5 a3 3 0 0 1 6 0 v2.5" fill="none" stroke="var(--gold)"/>
+          <text x="1048" y="188">cluster C</text></g>
+        <g><rect x="1024" y="202" width="167" height="24" rx="6" fill="var(--panel)" stroke="var(--stroke)"/>
+          <rect x="1031" y="212" width="9" height="8" rx="1.5" fill="none" stroke="var(--gold)"/><path d="M1032.5 212 v-2.5 a3 3 0 0 1 6 0 v2.5" fill="none" stroke="var(--gold)"/>
+          <text x="1048" y="218">petits SaaS</text></g>
+      </g>
+      <text x="1026" y="246" font-size="10.5" fill="currentColor" opacity=".8">kubeconfig · comptes · clés · jetons</text>
+      <text x="1026" y="264" font-size="10.5" font-family="var(--mono)" fill="var(--gold)">déposé sans être vu</text>
+      <text x="1026" y="280" font-size="10.5" fill="currentColor" opacity=".8">publié par qui le crée</text>
+      <text x="1026" y="296" font-size="10.5" fill="currentColor" opacity=".8">une seed y puise en naissant</text>
+
+      <rect x="1012" y="322" width="191" height="106" rx="10" fill="var(--elev)" stroke="currentColor"/>
+      <text x="1026" y="344" font-size="14" font-weight="700" fill="currentColor">Cantina · le PARLER</text>
+      <text x="1026" y="362" font-size="11" fill="currentColor" opacity=".7">les tables d'un cluster,</text>
+      <text x="1026" y="376" font-size="11" fill="currentColor" opacity=".7">vues de lui seul</text>
+      <text x="1026" y="398" font-size="10.5" font-family="var(--mono)" fill="currentColor" opacity=".8">CONSULTATION · AVIS</text>
+      <text x="1026" y="414" font-size="10.5" font-family="var(--mono)" fill="currentColor" opacity=".8">MISSION · RÉSULTAT · REVUE</text>
+
+      <rect x="1012" y="440" width="191" height="106" rx="10" fill="var(--elev)" stroke="currentColor"/>
+      <text x="1026" y="462" font-size="14" font-weight="700" fill="currentColor">Audit · le MESURER</text>
+      <text x="1026" y="480" font-size="11" fill="currentColor" opacity=".7">ce qui s'est dit, ce qui</text>
+      <text x="1026" y="494" font-size="11" fill="currentColor" opacity=".7">s'est fait, outil par outil</text>
+      <text x="1026" y="516" font-size="10.5" font-family="var(--mono)" fill="var(--gold)">« Auditer… » une table</text>
+      <text x="1026" y="532" font-size="10.5" fill="currentColor" opacity=".8">→ sa rétrospective</text>
+
+      <!-- Chaque cluster ne joint que son compartiment, par les outils MCP de KoA -->
+      <g stroke="var(--gold)" stroke-width="1.4" marker-end="url(#arG)">
+        <line x1="982" y1="290" x2="1010" y2="290"/>
+        <line x1="982" y1="380" x2="1010" y2="380"/>
+      </g>
+
       <!-- Cloisons -->
       <g stroke="var(--ko)" stroke-width="2" font-size="13" font-weight="700">
         <line x1="268" y1="392" x2="282" y2="406"/><line x1="282" y1="392" x2="268" y2="406"/>
         <line x1="513" y1="392" x2="527" y2="406"/><line x1="527" y1="392" x2="513" y2="406"/>
         <line x1="758" y1="392" x2="772" y2="406"/><line x1="772" y1="392" x2="758" y2="406"/>
       </g>
-      <text x="500" y="588" text-anchor="middle" font-size="12" fill="var(--ko)" font-weight="600">entre deux clusters : ni repo, ni jeton, ni MCP, ni mémoire, ni Cantina. Le seul qui traverse, c’est l’humain.</text>
+      <text x="500" y="588" text-anchor="middle" font-size="12" fill="var(--ko)" font-weight="600">entre deux clusters : ni repo, ni jeton, ni coffre, ni mémoire, ni Cantina. Le seul qui traverse, c’est l’humain.</text>
     </svg>
     </div>
-    <figcaption>Tout ce qui descend de la plateforme est générique et versionné. Tout ce qui nomme un environnement, un client ou un secret naît et reste dans le cluster. Ce qu'un agent apprend de générique remonte par une proposition de chapitre que l’humain accepte.</figcaption>
+    <figcaption>Tout ce qui descend de la plateforme est générique et versionné. Tout ce qui nomme un environnement, un client ou un secret naît et reste dans le cluster. Ce qu'un agent apprend de générique remonte par une proposition de chapitre que l’humain accepte. Sur le poste, KoA tient ce sur quoi les clusters s'appuient sans le porter : le coffre de chacun — ce qu'aucun repo ne doit tracker, qu'un agent dépose dans sa distro sans en voir la valeur —, ses tables à la Cantina, et l'audit qui en mesure le travail.</figcaption>
   </figure>
 </section>
 
@@ -607,6 +655,20 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
 </section>
 
 <section>
+  <div class="eyebrow">La méthode</div>
+  <h2>Un chantier, de la demande à la livraison</h2>
+  <p>Une équipe qu'on lance sur un grand chantier se met vite à parler en même temps, dans tous les sens. L'orchestrateur de l'équipe livrée ne délègue rien avant d'avoir planifié, et ne fait intervenir la recette et la sécurité qu'à des moments précis. Le livre <code>equipe/table</code> le dit pour les agents ; la skill <code>koa:mener-un-chantier</code> en donne les gestes.</p>
+  <ul class="road">
+    <li><div><b>L'inventaire</b><br><span>Qui est à la table, et combien de chaque rôle : deux agents du même rôle sont deux files de travail. Une présence ne se suppose jamais.</span></div><span class="eff">cantina_tables</span></li>
+    <li><div><b>Le tour de table</b><br><span>Une <code>CONSULTATION</code> aux spécialistes, un <code>AVIS</code> de chacun — découpage, dépendances, risques, choix à trancher —, et pas de débat.</span></div><span class="eff">avant toute mission</span></li>
+    <li><div><b>Le plan en vagues et son Gantt</b><br><span>Soumis une fois à l'humain avec toutes les décisions qu'on voit venir, tenu à l'heure réelle au QG, dans <code>docs/chantiers/&lt;chantier&gt;/</code>.</span></div><span class="eff">PLAN · à valider</span></li>
+    <li><div><b>Les missions</b><br><span>Une fiche par mission, commitée au QG ; le message n'en donne que l'adresse. En mission, on ne joue que les tests de ce qu'on touche.</span></div><span class="eff">MISSION · RÉSULTAT · REVUE</span></li>
+    <li><div><b>Finaliser une feature</b><br><span>Elle entre dans <code>develop</code>, et c'est le seul moment où tout se rejoue : suite complète, recette au navigateur si un parcours change, sécurité si la surface change.</span></div><span class="eff">FINALISATION</span></li>
+    <li><div><b>Livrer</b><br><span><code>develop</code> sur <code>master</code>, sur l'ordre de l'humain seulement : le SecOps passe toujours, le DevOps monte la version de chaque composant touché.</span></div><span class="eff">LIVRAISON</span></li>
+  </ul>
+</section>
+
+<section>
   <div class="eyebrow">Dans KoA</div>
   <h2>Ce que KoA porte pour vous</h2>
   <ul class="road nonum">
@@ -616,6 +678,9 @@ footer { font-size: 12.5px; color: var(--lo); border-top: 1px solid var(--stroke
     <li><div><b>La marketplace <code>koa-skills</code></b><br><span>Skills de rôle, plugins de plateforme, garde-fou de déploiement, épinglés par version : <a href="https://github.com/Happykiller/koa-skills">Happykiller/koa-skills</a>.</span></div><span class="eff ok">disponible</span></li>
     <li><div><b>Le QG d'un cluster, monté par une skill</b><br><span><code>CLAUDE.md</code>, KB, plugins épinglés et refus par défaut, remis d'aplomb sans rien écraser : <code>koa:monter-le-qg</code>.</span></div><span class="eff ok">disponible</span></li>
     <li><div><b>Une Cantina par cluster</b><br><span>Un agent ne voit et n'adresse que les agents de son cluster ; vous les voyez tous. Le champ <code>cluster</code> d'une seed l'active.</span></div><span class="eff ok">disponible</span></li>
+    <li><div><b>Un coffre par cluster</b><br><span>Ce qu'aucun repo ne doit tracker — <code>kubeconfig</code>, comptes, clés, jetons —, chiffré sur le poste. Un agent le dépose dans sa distro sans en voir la valeur, publie ce qu'il crée, et une seed y puise à la naissance. Vous le gérez depuis la carte du cluster.</span></div><span class="eff ok">disponible</span></li>
+    <li><div><b>La méthode de chantier</b><br><span>Inventaire, tour de table, plan en vagues, finaliser et livrer : dans les livres de l'équipe et la skill <code>koa:mener-un-chantier</code>.</span></div><span class="eff ok">disponible</span></li>
+    <li><div><b>L'audit d'une table</b><br><span>« Auditer… » sur une table de la Cantina : ce qui s'est dit, ce que chaque agent a fait outil par outil, et les constats mesurés, dans une rétrospective prête à rédiger.</span></div><span class="eff ok">disponible</span></li>
   </ul>
 </section>
 

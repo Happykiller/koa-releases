@@ -710,7 +710,7 @@ function seed() {
       lines: [T.prompt("Ajoute l'export PDF des avoirs, avec ses tests"),
         T.tool('Read', 'src/export/pdf.ts'), T.res('Read 214 lines'),
         T.tool('Read', 'src/models/avoir.ts'), T.res('Read 87 lines')] },
-    { id: 'site', cl: 'vitrine', name: 'site-vitrine', label: '', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine',
+    { id: 'site', cl: 'vitrine', name: 'site-vitrine', label: '', user: 'helene', distro: 'Ubuntu', path: '~/www/site-vitrine',
       git: GIT.site, mode: 'défaut', state: 'starting', since: now, desc: '', last: '', prompt: '', lines: [] },
     { id: 'mig', cl: 'produit', name: 'migrations', label: 'v2.4', user: 'bob', distro: 'Debian', path: '~/data/migrations',
       git: GIT.mig, mode: 'auto', state: 'running', since: now - 95e3, desc: 'Relit les index de la table factures', last: '',
@@ -741,7 +741,7 @@ function seed() {
 const CATALOGUE = [
   { g: 'Clients', items: [
     { name: 'facturation', cl: 'produit', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api', pre: 'nvm use 20', pc: '#C58BC0', git: GIT.fac },
-    { name: 'site-vitrine', cl: 'vitrine', user: 'celine', distro: 'Ubuntu', path: '~/www/site-vitrine', pre: '', pc: '#8FC7A8', git: GIT.site },
+    { name: 'site-vitrine', cl: 'vitrine', user: 'helene', distro: 'Ubuntu', path: '~/www/site-vitrine', pre: '', pc: '#8FC7A8', git: GIT.site },
     { name: 'migrations', cl: 'produit', user: 'bob', distro: 'Debian', path: '~/data/migrations', pre: 'source .env', pc: '#A6BEE6', git: GIT.mig },
   ] },
   { g: 'Interne', items: [

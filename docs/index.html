@@ -318,10 +318,25 @@ button { cursor: pointer; }
 
 /* Notifications */
 .toasts { position: absolute; top: 44px; right: 12px; width: min(340px, calc(100% - 24px)); display: grid; gap: 8px; z-index: 5; pointer-events: none; }
-.toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; background: var(--bg-elev); border: 1px solid var(--stroke-hi); border-radius: 9px; padding: 10px 12px; box-shadow: var(--shadow); font-size: 12.5px; animation: tin .25s ease-out; }
-.toast .pst { width: 14px; height: 14px; }
-.toast p { margin: 0; flex: 1; min-width: 0; }
-.toast button { border: 1px solid var(--stroke-hi); background: var(--bg-panel); border-radius: 6px; padding: 3px 10px; font-size: 12px; }
+/* KoA 1.33 : des cartes qui disent leur gravité, un temps qui s'écoule (suspendu au survol), et un centre. */
+.toast { --c: var(--mid); pointer-events: auto; position: relative; overflow: hidden; display: grid; gap: 5px; background: var(--bg-elev); border: 1px solid var(--stroke-hi); border-left: 3px solid var(--c); border-radius: 10px; padding: 9px 10px 11px 12px; box-shadow: var(--shadow); font-size: 12.5px; animation: tin .25s ease-out; }
+.toast .th { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--lo); }
+.toast .gl { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); }
+.toast .lb { color: var(--c); font-weight: 600; letter-spacing: .06em; }
+.toast .x { margin-left: auto; border: 0; background: transparent; color: var(--lo); padding: 0 4px; font-size: 13px; }
+.toast p { margin: 0; color: var(--hi); font-weight: 600; }
+.toast .acts button { border: 1px solid var(--stroke-hi); background: var(--bg-panel); border-radius: 6px; padding: 3px 10px; font-size: 12px; }
+.toast .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--c); transform-origin: left; animation: tbar var(--d, 6s) linear forwards; }
+.toast:hover .bar { animation-play-state: paused; }
+@keyframes tbar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.titlebar .bell { position: relative; width: 34px; }
+.titlebar .bell .badge { position: absolute; top: 1px; right: 3px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--s-start); color: var(--bg-app); font-size: 10px; font-weight: 700; line-height: 15px; }
+.centre { position: absolute; top: 40px; right: 12px; width: min(380px, calc(100% - 24px)); max-height: 70%; overflow: auto; z-index: 6; background: var(--bg-elev); border: 1px solid var(--stroke-hi); border-radius: 12px; box-shadow: var(--shadow); padding: 12px 14px; }
+.centre h3 { margin: 0; font-size: 14px; }
+.centre .rs { color: var(--lo); font-size: 12px; margin: 2px 0 10px; }
+.centre .sec { color: var(--lo); font-size: 11px; font-weight: 600; letter-spacing: .08em; margin: 10px 0 6px; }
+.centre .toast { animation: none; box-shadow: none; margin-bottom: 6px; }
+.centre .vide { color: var(--lo); font-size: 12px; }
 @keyframes tin { from { transform: translateY(-6px); opacity: 0; } }
 
 /* Sous la fenêtre */
@@ -360,6 +375,7 @@ button { cursor: pointer; }
   .pst[data-state="starting"] { animation: none; }
   .win { transition: none; }
   .toast { animation: none; }
+  .toast .bar { animation: none; }
 }
 
 /* La Cantina et le coffre (KoA 1.20, 1.21) : deux pages du panneau, ouvertes depuis la barre de titre. */
@@ -433,8 +449,10 @@ button { cursor: pointer; }
         <span class="sp"></span>
         <button type="button" class="tbn" id="tbCantina" aria-pressed="false" title="La Cantina : les tables où vos agents se parlent">Cantina</button>
         <button type="button" class="tbn" id="tbCoffre" aria-pressed="false" title="Le coffre du cluster de l'espace ouvert">Coffre</button>
+        <button type="button" class="bell" id="tbBell" title="Notifications : tout ce que KoA a dit" aria-label="Centre des notifications" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M4 11V7a4 4 0 0 1 8 0v4l1.5 1.5h-11z"/><path d="M6.5 14a1.5 1.5 0 0 0 3 0"/></svg><span class="badge" id="bellBadge" hidden></span></button>
         <button type="button" id="tbMin" title="Réduire : le dock prend le relais" aria-label="Réduire la fenêtre">–</button>
       </div>
+      <div class="centre" id="centre" hidden aria-label="Centre des notifications"></div>
       <div class="tabs" id="tabs" role="tablist" aria-label="Espaces"></div>
       <aside class="sidebar">
         <div class="sbhead"><h2>Sessions</h2><span id="count"></span></div>
@@ -1267,17 +1285,48 @@ $('#dock').addEventListener('click', e => {
 $('#btnMin').addEventListener('click', () => setMin(!minimized));
 $('#tbMin').addEventListener('click', () => setMin(true));
 
-// ——— Notifications ———
-function toast(text, s) {
-  const host = $('#toasts');
+// ——— Notifications (KoA 1.33) ———
+// Une carte par message : la gravité par la bande, le glyphe et le libellé ; une barre qui s'écoule,
+// suspendue au survol ; trois au plus. Le centre garde tout, et le geste s'y rejoue.
+const NOTIFS = [];
+let nonLues = 0;
+function carte(n, auCentre) {
   const el = document.createElement('div');
   el.className = 'toast';
-  el.innerHTML = (s ? `<span class="pst" data-state="${s.state}"></span>` : '') + `<p>${esc(text)}</p>` + (s ? `<button type="button">Voir</button>` : '');
-  if (s) $('button', el).addEventListener('click', () => { el.remove(); if (live(s)) select(s.id); });
-  host.appendChild(el);
-  while (host.children.length > 3) host.firstChild.remove();
-  setTimeout(() => el.remove(), 6000);
+  el.innerHTML = `<div class="th"><span class="gl">i</span><span class="lb">INFO</span><span>· ${n.h}</span>`
+    + (auCentre ? '' : '<button type="button" class="x" aria-label="Fermer la notification">✕</button>') + `</div><p>${esc(n.text)}</p>`
+    + (n.s ? '<div class="acts"><button type="button">Voir</button></div>' : '')
+    + (auCentre ? '' : `<span class="bar" style="--d:${n.s ? 15 : 6}s"></span>`);
+  if (n.s) $('.acts button', el).addEventListener('click', () => { lire(n); el.remove(); fermerCentre(); if (live(n.s)) select(n.s.id); });
+  if (!auCentre) {
+    $('.x', el).addEventListener('click', () => { lire(n); el.remove(); });
+    $('.bar', el).addEventListener('animationend', () => el.remove());
+  }
+  return el;
 }
+function toast(text, s) {
+  const n = { text, s, h: hm(), lue: false };
+  NOTIFS.unshift(n); nonLues++; badge();
+  const host = $('#toasts');
+  host.appendChild(carte(n, false));
+  while (host.children.length > 3) host.firstChild.remove();
+  if (!$('#centre').hidden) ouvrirCentre();
+}
+function lire(n) { if (!n.lue) { n.lue = true; nonLues--; badge(); } }
+function badge() { const b = $('#bellBadge'); b.textContent = nonLues; b.hidden = nonLues === 0; }
+function ouvrirCentre() {
+  const c = $('#centre');
+  const neuves = NOTIFS.filter(n => !n.lue);
+  c.innerHTML = `<h3>Notifications</h3><p class="rs">${NOTIFS.length === 0 ? 'Rien depuis le démarrage de KoA' : `${neuves.length} nouvelle${neuves.length > 1 ? 's' : ''} · ${NOTIFS.length} au total`}</p>`;
+  const section = (nom, liste) => { if (!liste.length) return; c.insertAdjacentHTML('beforeend', `<div class="sec">${nom}</div>`); liste.forEach(n => c.appendChild(carte(n, true))); };
+  section('NOUVELLES', neuves);
+  section('PLUS TÔT', NOTIFS.filter(n => n.lue && !neuves.includes(n)));
+  if (!NOTIFS.length) c.insertAdjacentHTML('beforeend', '<p class="vide">Rien à relire.</p>');
+  NOTIFS.forEach(n => n.lue = true); nonLues = 0; badge();
+  c.hidden = false; $('#tbBell').setAttribute('aria-expanded', 'true');
+}
+function fermerCentre() { $('#centre').hidden = true; $('#tbBell').setAttribute('aria-expanded', 'false'); }
+$('#tbBell').addEventListener('click', () => $('#centre').hidden ? ouvrirCentre() : fermerCentre());
 function announce(s) {
   if (!minimized && s.id === sel && view === 'session') return;
   toast(`${s.name} demande une autorisation : ${s.ask.tool} · ${s.ask.cmd}`, s);
@@ -1476,6 +1525,7 @@ function start() {
   $('#retro').hidden = true;
   for (const k of Object.keys(derniere)) delete derniere[k];
   $('#toasts').innerHTML = '';
+  NOTIFS.length = 0; nonLues = 0; badge(); fermerCentre();
   $('#q').value = '';
   renderSidebar(); renderPane(); renderDock();
   const site = sessions.find(s => s.id === 'site');

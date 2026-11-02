@@ -333,6 +333,8 @@ button { cursor: pointer; }
 .titlebar .bell .badge { position: absolute; top: 1px; right: 3px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--s-start); color: var(--bg-app); font-size: 10px; font-weight: 700; line-height: 15px; }
 .centre { position: absolute; top: 40px; right: 12px; width: min(380px, calc(100% - 24px)); max-height: 70%; overflow: auto; z-index: 6; background: var(--bg-elev); border: 1px solid var(--stroke-hi); border-radius: 12px; box-shadow: var(--shadow); padding: 12px 14px; }
 .centre h3 { margin: 0; font-size: 14px; }
+.centre .hd { display: flex; align-items: baseline; gap: 8px; }
+.centre .eff { margin-left: auto; border: 1px solid var(--stroke-hi); background: transparent; color: var(--mid, var(--lo)); border-radius: 6px; padding: 2px 8px; font-size: 12px; cursor: pointer; }
 .centre .rs { color: var(--lo); font-size: 12px; margin: 2px 0 10px; }
 .centre .sec { color: var(--lo); font-size: 11px; font-weight: 600; letter-spacing: .08em; margin: 10px 0 6px; }
 .centre .toast { animation: none; box-shadow: none; margin-bottom: 6px; }
@@ -1288,17 +1290,19 @@ $('#tbMin').addEventListener('click', () => setMin(true));
 // ——— Notifications (KoA 1.33) ———
 // Une carte par message : la gravité par la bande, le glyphe et le libellé ; une barre qui s'écoule,
 // suspendue au survol ; trois au plus. Le centre garde tout, et le geste s'y rejoue.
+// KoA 1.34 : la croix d'une carte du centre l'efface, et « Tout effacer » vide le centre.
 const NOTIFS = [];
-let nonLues = 0;
+let nonLues = 0, effacees = 0;
 function carte(n, auCentre) {
   const el = document.createElement('div');
   el.className = 'toast';
   el.innerHTML = `<div class="th"><span class="gl">i</span><span class="lb">INFO</span><span>· ${n.h}</span>`
-    + (auCentre ? '' : '<button type="button" class="x" aria-label="Fermer la notification">✕</button>') + `</div><p>${esc(n.text)}</p>`
+    + `<button type="button" class="x" aria-label="${auCentre ? 'Effacer la notification' : 'Fermer la notification'}">✕</button></div><p>${esc(n.text)}</p>`
     + (n.s ? '<div class="acts"><button type="button">Voir</button></div>' : '')
     + (auCentre ? '' : `<span class="bar" style="--d:${n.s ? 15 : 6}s"></span>`);
   if (n.s) $('.acts button', el).addEventListener('click', () => { lire(n); el.remove(); fermerCentre(); if (live(n.s)) select(n.s.id); });
-  if (!auCentre) {
+  if (auCentre) $('.x', el).addEventListener('click', () => effacer([n]));
+  else {
     $('.x', el).addEventListener('click', () => { lire(n); el.remove(); });
     $('.bar', el).addEventListener('animationend', () => el.remove());
   }
@@ -1317,13 +1321,20 @@ function badge() { const b = $('#bellBadge'); b.textContent = nonLues; b.hidden 
 function ouvrirCentre() {
   const c = $('#centre');
   const neuves = NOTIFS.filter(n => !n.lue);
-  c.innerHTML = `<h3>Notifications</h3><p class="rs">${NOTIFS.length === 0 ? 'Rien depuis le démarrage de KoA' : `${neuves.length} nouvelle${neuves.length > 1 ? 's' : ''} · ${NOTIFS.length} au total`}</p>`;
+  const resume = NOTIFS.length ? (neuves.length ? `${neuves.length} nouvelle${neuves.length > 1 ? 's' : ''}` : 'Tout est lu') + ` · ${NOTIFS.length} au total`
+    : effacees ? `Rien à relire · ${effacees} effacée${effacees > 1 ? 's' : ''}` : 'Rien depuis le démarrage de KoA';
+  c.innerHTML = `<div class="hd"><h3>Notifications</h3>${NOTIFS.length ? `<button type="button" class="eff">Tout effacer (${NOTIFS.length})</button>` : ''}</div><p class="rs">${resume}</p>`;
+  if (NOTIFS.length) $('.eff', c).addEventListener('click', () => effacer(NOTIFS.slice()));
   const section = (nom, liste) => { if (!liste.length) return; c.insertAdjacentHTML('beforeend', `<div class="sec">${nom}</div>`); liste.forEach(n => c.appendChild(carte(n, true))); };
   section('NOUVELLES', neuves);
   section('PLUS TÔT', NOTIFS.filter(n => n.lue && !neuves.includes(n)));
   if (!NOTIFS.length) c.insertAdjacentHTML('beforeend', '<p class="vide">Rien à relire.</p>');
   NOTIFS.forEach(n => n.lue = true); nonLues = 0; badge();
   c.hidden = false; $('#tbBell').setAttribute('aria-expanded', 'true');
+}
+function effacer(liste) {
+  liste.forEach(n => { const i = NOTIFS.indexOf(n); if (i >= 0) { lire(n); NOTIFS.splice(i, 1); effacees++; } });
+  ouvrirCentre();
 }
 function fermerCentre() { $('#centre').hidden = true; $('#tbBell').setAttribute('aria-expanded', 'false'); }
 $('#tbBell').addEventListener('click', () => $('#centre').hidden ? ouvrirCentre() : fermerCentre());

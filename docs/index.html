@@ -251,8 +251,8 @@ button { cursor: pointer; }
 .entry .en { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13px; line-height: 18px; }
 .entry .chip { width: 14px; height: 14px; border-radius: 4px; background: var(--pc); flex: none; }
 .entry .em { grid-column: 2 / 4; font: 11px/1.5 var(--mono); color: var(--s-idle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.entry .liens { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
-.entry .lien { font-size: 10px; line-height: 14px; padding: 0 4px; border-radius: 4px; border: 1px solid var(--lc); color: var(--lc); background: color-mix(in srgb, var(--lc) 19%, transparent); }
+.entry .liens { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+.entry .lien { font-size: 12px; line-height: 18px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--lc); color: var(--lc); background: color-mix(in srgb, var(--lc) 19%, transparent); }
 .entry .more { color: var(--lo); font-size: 15px; line-height: 18px; }
 .entry .modes { grid-column: 2 / 4; display: flex; gap: 6px; margin-top: 8px; }
 .modes .claude { flex: 1; border: 1px solid var(--gold-line); background: var(--gold-soft); color: var(--gold); border-radius: 6px; padding: 5px 8px; font-weight: 600; }
@@ -763,11 +763,11 @@ function seed() {
 const CATALOGUE = [
   { g: 'Clients', items: [
     { name: 'facturation', cl: 'produit', user: 'admin', distro: 'Debian', path: '~/projets/facturation-api', pre: 'nvm use 20', pc: '#C58BC0', git: GIT.fac,
-      liens: [['Seed', 'ok'], ['Skills', 'ok'], ['Profil', 'ok'], ['Framework', 'ok']] },
+      liens: [['Seed', 'ok'], ['Profil', 'ok']] },
     { name: 'site-vitrine', cl: 'vitrine', user: 'helene', distro: 'Ubuntu', path: '~/www/site-vitrine', pre: '', pc: '#8FC7A8', git: GIT.site,
       liens: [['Seed', 'nm'], ['Profil', 'retard']] },
     { name: 'migrations', cl: 'produit', user: 'bob', distro: 'Debian', path: '~/data/migrations', pre: 'source .env', pc: '#A6BEE6', git: GIT.mig,
-      liens: [['Seed', 'casse'], ['Skills', 'retard'], ['Profil', 'ok'], ['Framework', 'casse']] },
+      liens: [['Distro', 'casse'], ['Seed', 'ok'], ['Profil', 'retard']] },
   ] },
   { g: 'Interne', items: [
     { name: 'docs-produit', cl: 'vitrine', user: 'admin', distro: 'Debian', path: '~/projets/docs-produit', pre: '', pc: '#D9A9D4', git: GIT.docs },
@@ -776,11 +776,11 @@ const CATALOGUE = [
   ] },
 ];
 
-// Les badges d'un raccourci (KoA, épic 198) : le signe, le mot et la teinte de chaque état. Rien d'autre ne décide ici : ce sont des exemples.
+// Les badges d'un raccourci (KoA, épics 198 et 199) : le signe, le mot et la teinte de chaque état. Rien d'autre ne décide ici : ce sont des exemples.
 const ETATS_LIEN = {
   ok: { s: '✓', mot: 'à jour', c: 'var(--s-end)' },
-  retard: { s: '↻', mot: 'en retard', c: 'var(--s-wait)' },
-  casse: { s: '✗', mot: 'cassé', c: 'var(--s-err)' },
+  retard: { s: '↓', mot: 'à mettre à jour', c: 'var(--s-start)' },
+  casse: { s: '▲', mot: 'en panne', c: 'var(--s-err)' },
   nm: { s: '?', mot: 'pas mesuré', c: 'var(--s-idle)' },
 };
 

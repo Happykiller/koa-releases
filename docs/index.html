@@ -1353,6 +1353,9 @@ function effacer(liste) {
 function fermerCentre() { $('#centre').hidden = true; $('#tbBell').setAttribute('aria-expanded', 'false'); }
 $('#tbBell').addEventListener('click', () => $('#centre').hidden ? ouvrirCentre() : fermerCentre());
 function announce(s) {
+  // KoA 1.37 : resté une minute sur une permission, l'agent se signale, où que l'on soit. Une fois par attente.
+  const demande = s.ask;
+  setTimeout(() => { if (live(s) && s.state === 'waiting' && s.ask === demande) toast(`Autorisation attendue : ${s.name} attend une permission depuis une minute.`, s); }, 60000);
   if (!minimized && s.id === sel && view === 'session') return;
   toast(`${s.name} demande une autorisation : ${s.ask.tool} · ${s.ask.cmd}`, s);
 }

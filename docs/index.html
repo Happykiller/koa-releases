@@ -252,7 +252,8 @@ button { cursor: pointer; }
 .entry .chip { width: 14px; height: 14px; border-radius: 4px; background: var(--pc); flex: none; }
 .entry .em { grid-column: 2 / 4; font: 11px/1.5 var(--mono); color: var(--s-idle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .entry .liens { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
-.entry .lien { font-size: 12px; line-height: 18px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--lc); color: var(--lc); background: color-mix(in srgb, var(--lc) 19%, transparent); }
+.entry .lien { display: inline-flex; align-items: center; gap: 5px; min-height: 22px; box-sizing: border-box; font-size: 12px; line-height: 18px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--lc); color: var(--lc); }
+.entry .lien:hover { background: var(--bg-hover); }
 .entry .more { color: var(--lo); font-size: 15px; line-height: 18px; }
 .entry .modes { grid-column: 2 / 4; display: flex; gap: 6px; margin-top: 8px; }
 .modes .claude { flex: 1; border: 1px solid var(--gold-line); background: var(--gold-soft); color: var(--gold); border-radius: 6px; padding: 5px 8px; font-weight: 600; }
@@ -1100,7 +1101,7 @@ function renderCatalogue() {
           <span class="en"><span class="chip" style="--pc:${e.pc}"></span>${esc(e.name)}</span>
           <button type="button" class="more" title="Modifier le raccourci" aria-label="Modifier ${esc(e.name)}">⋯</button>
           <span class="em">${esc(e.user)}@${esc(e.distro)} · ${esc(e.path)}${e.pre ? ' · ' + esc(e.pre) : ''}</span>
-          ${e.liens ? `<span class="liens">${e.liens.map(([nom, etat]) => `<span class="lien" style="--lc:${ETATS_LIEN[etat].c}" title="${esc(nom)} — ${ETATS_LIEN[etat].mot}">${ETATS_LIEN[etat].s} ${esc(nom)}</span>`).join('')}</span>` : ''}
+          ${e.liens ? `<span class="liens">${e.liens.map(([nom, etat]) => `<span class="lien" style="--lc:${ETATS_LIEN[etat].c}" title="${esc(nom)} — ${ETATS_LIEN[etat].mot}"><span aria-hidden="true">${ETATS_LIEN[etat].s}</span>${esc(nom)}</span>`).join('')}</span>` : ''}
           <div class="modes">
             <button type="button" class="claude" data-m="claude">✦ Claude</button>
             <button type="button" class="door" data-m="term" title="Terminal">›_</button>
